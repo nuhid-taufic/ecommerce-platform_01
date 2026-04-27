@@ -6,6 +6,7 @@ import {
   Search,
   SlidersHorizontal,
   ChevronRight,
+  ChevronDown,
   X,
   Sparkles,
   Loader2,
@@ -13,6 +14,7 @@ import {
 import Link from "next/link";
 import { useCartStore } from "../../store/cartStore.js";
 import toast from "react-hot-toast";
+import { useRef } from "react";
 
 export default function ShopPage() {
   const [allProducts, setAllProducts] = useState<any[]>([]);
@@ -26,6 +28,10 @@ export default function ShopPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
   const [isAILoading, setIsAILoading] = useState(false);
+  const [sortBy, setSortBy] = useState("Default");
+  const [isSortDropdownOpen, setIsSortDropdownOpen] = useState(false);
+  const desktopSortDropdownRef = useRef<HTMLDivElement>(null);
+  const mobileSortDropdownRef = useRef<HTMLDivElement>(null);
 
   const { addToCart } = useCartStore();
 
@@ -82,13 +88,48 @@ export default function ShopPage() {
   }, []);
 
   useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const isOutsideDesktop =
+        desktopSortDropdownRef.current &&
+        !desktopSortDropdownRef.current.contains(event.target as Node);
+      const isOutsideMobile =
+        mobileSortDropdownRef.current &&
+        !mobileSortDropdownRef.current.contains(event.target as Node);
+
+      if (isOutsideDesktop && isOutsideMobile) {
+        setIsSortDropdownOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  useEffect(() => {
     let result = [...aiSearchResults];
     if (selectedCategory !== "All") {
       result = result.filter((p) => p.category === selectedCategory);
     }
     result = result.filter((p) => p.price <= priceRange);
+
+    // Apply Sorting
+    if (sortBy === "Price Low to High") {
+      result.sort((a, b) => a.price - b.price);
+    } else if (sortBy === "Price high to low") {
+      result.sort((a, b) => b.price - a.price);
+    } else if (sortBy === "Latest") {
+      result.sort(
+        (a, b) =>
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+      );
+    } else if (sortBy === "Oldest") {
+      result.sort(
+        (a, b) =>
+          new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
+      );
+    }
+
     setFilteredProducts(result);
-  }, [selectedCategory, priceRange, aiSearchResults]);
+  }, [selectedCategory, priceRange, aiSearchResults, sortBy]);
 
   const handleAISearch = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -143,16 +184,58 @@ export default function ShopPage() {
       </div>
 
       <div className="max-w-7xl mx-auto px-6 lg:px-8 pb-24 flex flex-col lg:flex-row gap-12">
-        <div className="lg:hidden flex items-center justify-between border-b border-gray-200 pb-4">
-          <span className="font-medium text-sm">
-            {filteredProducts.length} Results
-          </span>
-          <button
-            onClick={() => setIsMobileFilterOpen(true)}
-            className="flex items-center gap-2 text-sm font-bold uppercase tracking-widest"
-          >
-            <SlidersHorizontal className="h-4 w-4" /> Filters
-          </button>
+        <div className="lg:hidden border-b border-gray-200 pb-4 mb-6">
+          <div className="flex items-center justify-between mb-4">
+            <span className="font-medium text-sm">
+              {filteredProducts.length} Results
+            </span>
+            <button
+              onClick={() => setIsMobileFilterOpen(true)}
+              className="flex items-center gap-2 text-sm font-bold uppercase tracking-widest"
+            >
+              <SlidersHorizontal className="h-4 w-4" /> Filters
+            </button>
+          </div>
+
+          <div className="relative" ref={mobileSortDropdownRef}>
+            <button
+              onClick={() => setIsSortDropdownOpen(!isSortDropdownOpen)}
+              className="w-full flex items-center justify-between text-sm font-medium text-black bg-white border border-gray-200 rounded-xl px-4 py-3 shadow-sm"
+            >
+              <span className="flex items-center gap-2">
+                <span className="text-gray-400 uppercase text-[10px] tracking-widest font-bold">
+                  Sort By:
+                </span>{" "}
+                {sortBy}
+              </span>
+              <ChevronDown
+                className={`h-4 w-4 text-gray-400 transition-transform duration-300 ${isSortDropdownOpen ? "rotate-180" : ""}`}
+              />
+            </button>
+
+            {isSortDropdownOpen && (
+              <div className="absolute left-0 right-0 mt-2 bg-white border border-gray-100 shadow-2xl rounded-2xl z-50 py-2 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
+                {[
+                  "Default",
+                  "Latest",
+                  "Oldest",
+                  "Price Low to High",
+                  "Price high to low",
+                ].map((option) => (
+                  <button
+                    key={option}
+                    onClick={() => {
+                      setSortBy(option);
+                      setIsSortDropdownOpen(false);
+                    }}
+                    className={`w-full text-left px-5 py-3 text-sm transition-colors ${sortBy === option ? "bg-black text-white font-bold" : "text-gray-600 hover:bg-gray-50"}`}
+                  >
+                    {option}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
 
         <aside
@@ -262,9 +345,49 @@ export default function ShopPage() {
         </aside>
 
         <main className="flex-1">
-          <div className="hidden lg:block text-sm text-gray-500 mb-8 border-b border-gray-200 pb-4">
-            Showing {filteredProducts.length} result
-            {filteredProducts.length !== 1 ? "s" : ""}
+          <div className="hidden lg:flex items-center justify-between text-sm text-gray-500 mb-8 border-b border-gray-200 pb-4">
+            <div>
+              Showing {filteredProducts.length} result
+              {filteredProducts.length !== 1 ? "s" : ""}
+            </div>
+
+            <div className="relative" ref={desktopSortDropdownRef}>
+              <button
+                onClick={() => setIsSortDropdownOpen(!isSortDropdownOpen)}
+                className="flex items-center gap-2 font-medium text-black hover:opacity-70 transition-opacity"
+              >
+                <span className="text-gray-400 uppercase text-[10px] tracking-widest font-bold">
+                  Sort By:
+                </span>
+                <span className="min-w-[100px] text-left">{sortBy}</span>
+                <ChevronDown
+                  className={`h-4 w-4 transition-transform duration-300 ${isSortDropdownOpen ? "rotate-180" : ""}`}
+                />
+              </button>
+
+              {isSortDropdownOpen && (
+                <div className="absolute right-0 mt-3 w-56 bg-white border border-gray-100 shadow-2xl rounded-2xl z-50 py-2 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
+                  {[
+                    "Default",
+                    "Latest",
+                    "Oldest",
+                    "Price Low to High",
+                    "Price high to low",
+                  ].map((option) => (
+                    <button
+                      key={option}
+                      onClick={() => {
+                        setSortBy(option);
+                        setIsSortDropdownOpen(false);
+                      }}
+                      className={`w-full text-left px-5 py-3 text-sm transition-colors ${sortBy === option ? "bg-black text-white font-bold" : "text-gray-600 hover:bg-gray-50"}`}
+                    >
+                      {option}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
 
           {loading || isAILoading ? (
