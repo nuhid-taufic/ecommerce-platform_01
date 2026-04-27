@@ -20,6 +20,7 @@ const createCoupon = async (req, res) => {
       minOrderAmount,
       expiryDate,
       usageLimit,
+      createdBy,
     } = req.body;
 
     const existingCoupon = await Coupon.findOne({ code: code.toUpperCase() });
@@ -35,13 +36,28 @@ const createCoupon = async (req, res) => {
       discountValue,
       minOrderAmount,
       expiryDate,
-      usageLimit,
+      usageLimit: usageLimit || 1,
+      createdBy,
     });
 
     await coupon.save();
     res
       .status(201)
       .json({ success: true, message: "Coupon created successfully", coupon });
+  } catch (error) {
+    res
+      .status(500)
+      .json({ success: false, message: "Server Error", error: error.message });
+  }
+};
+
+const getMyCoupons = async (req, res) => {
+  try {
+    const { email } = req.params;
+    const coupons = await Coupon.find({ createdBy: email }).sort({
+      createdAt: -1,
+    });
+    res.status(200).json({ success: true, coupons });
   } catch (error) {
     res
       .status(500)
@@ -67,4 +83,28 @@ const deleteCoupon = async (req, res) => {
   }
 };
 
-module.exports = { getCoupons, createCoupon, deleteCoupon };
+const verifyCoupon = async (req, res) => {
+  try {
+    const { code } = req.params;
+    const coupon = await Coupon.findOne({ code: code.toUpperCase() });
+
+    if (!coupon) {
+      return res.status(404).json({ success: false, message: "Coupon not found" });
+    }
+    if (!coupon.isActive) {
+      return res.status(400).json({ success: false, message: "This coupon is inactive" });
+    }
+    if (new Date(coupon.expiryDate) < new Date()) {
+      return res.status(400).json({ success: false, message: "This coupon has expired" });
+    }
+    if (coupon.usedCount >= coupon.usageLimit) {
+      return res.status(400).json({ success: false, message: "Coupon usage limit reached" });
+    }
+
+    res.status(200).json({ success: true, coupon });
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Server Error", error: error.message });
+  }
+};
+
+module.exports = { getCoupons, createCoupon, deleteCoupon, verifyCoupon, getMyCoupons };

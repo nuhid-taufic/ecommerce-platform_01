@@ -14,6 +14,7 @@ const couponSchema = new mongoose.Schema(
     usageLimit: { type: Number, default: 100 },
     usedCount: { type: Number, default: 0 },
     isActive: { type: Boolean, default: true },
+    createdBy: { type: String }, // Email of the user who created it
   },
   { timestamps: true },
 );
