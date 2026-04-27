@@ -101,6 +101,7 @@ const login = async (req, res) => {
         avatar: user.avatar,
         role: user.role,
         addresses: user.addresses,
+        createdAt: user.createdAt,
       },
     });
   } catch (error) {
@@ -264,6 +265,113 @@ const saveAddress = async (req, res) => {
   }
 };
 
+const deleteAddress = async (req, res) => {
+  try {
+    const { email, index } = req.body;
+    if (!email || index === undefined) {
+      return res.status(400).json({ success: false, message: "Email and index are required" });
+    }
+
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ success: false, message: "User not found" });
+    }
+
+    user.addresses.splice(index, 1);
+    await user.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Address deleted successfully",
+      addresses: user.addresses,
+    });
+  } catch (error) {
+    console.error("Delete Address Error:", error);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+};
+
+const updateProfile = async (req, res) => {
+  try {
+    const { email, name, mobile, newPassword } = req.body;
+    if (!email) {
+      return res.status(400).json({ success: false, message: "Email is required" });
+    }
+
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ success: false, message: "User not found" });
+    }
+
+    if (name) user.name = name;
+    if (mobile !== undefined) user.mobile = mobile;
+    
+    if (newPassword) {
+      const { currentPassword } = req.body;
+      if (!currentPassword) {
+        return res.status(400).json({ success: false, message: "Current password is required to set a new one" });
+      }
+      
+      const isMatch = await bcrypt.compare(currentPassword, user.password);
+      if (!isMatch) {
+        return res.status(400).json({ success: false, message: "Incorrect current password" });
+      }
+
+      if (newPassword.length < 6) {
+        return res.status(400).json({ success: false, message: "Password must be at least 6 characters" });
+      }
+      const salt = await bcrypt.genSalt(10);
+      user.password = await bcrypt.hash(newPassword, salt);
+    }
+
+    await user.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Profile updated successfully",
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        mobile: user.mobile,
+        avatar: user.avatar,
+        role: user.role,
+        addresses: user.addresses,
+        createdAt: user.createdAt,
+      },
+    });
+  } catch (error) {
+    console.error("Update Profile Error:", error);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+};
+
+const deleteAccount = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    if (!email || !password) {
+      return res.status(400).json({ success: false, message: "Email and password are required" });
+    }
+
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ success: false, message: "User not found" });
+    }
+
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      return res.status(400).json({ success: false, message: "Incorrect password" });
+    }
+
+    await User.findByIdAndDelete(user._id);
+
+    res.status(200).json({ success: true, message: "Account deleted successfully" });
+  } catch (error) {
+    console.error("Delete Account Error:", error);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+};
+
 module.exports = {
   register,
   login,
@@ -271,4 +379,7 @@ module.exports = {
   verifyResetOtp,
   resetPassword,
   saveAddress,
+  deleteAddress,
+  updateProfile,
+  deleteAccount,
 };

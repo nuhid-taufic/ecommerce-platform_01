@@ -8,6 +8,9 @@ const {
   verifyResetOtp,
   resetPassword,
   saveAddress,
+  deleteAddress,
+  updateProfile,
+  deleteAccount,
 } = require("../controllers/authController");
 
 router.post("/register", register);
@@ -18,6 +21,9 @@ router.post("/verify-reset-otp", verifyResetOtp);
 router.post("/reset-password", resetPassword);
 
 router.post("/address", saveAddress);
+router.post("/delete-address", deleteAddress);
+router.put("/update-profile", updateProfile);
+router.delete("/delete-account", deleteAccount);
 
 router.get("/google", (req, res, next) => {
   const action = req.query.action || "login";
