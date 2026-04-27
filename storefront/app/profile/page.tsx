@@ -16,6 +16,7 @@ import {
   Trash2,
   Plus,
   X,
+  ShieldAlert,
 } from "lucide-react";
 import toast from "react-hot-toast";
 import { useAuthStore } from "@/store/authStore";
@@ -692,6 +693,7 @@ const ManageProfile = ({ user, updateUser, logout }: { user: any; updateUser: an
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteStep, setDeleteStep] = useState<"password" | "confirm">("password");
   const [delPassword, setDelPassword] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const handleUpdate = async () => {
     setLoading(true);
