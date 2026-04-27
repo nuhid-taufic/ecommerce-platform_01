@@ -120,7 +120,7 @@ export default function HomePage() {
           <span className="w-1.5 h-1.5 bg-gray-300 rounded-full"></span>
           <span>Electronics</span>{" "}
           <span className="w-1.5 h-1.5 bg-gray-300 rounded-full"></span>
-          <span>Clothing</span>{" "}
+          <span>Cloths</span>{" "}
           <span className="w-1.5 h-1.5 bg-gray-300 rounded-full"></span>
           <span>Accessories</span>{" "}
           <span className="w-1.5 h-1.5 bg-gray-300 rounded-full"></span>
