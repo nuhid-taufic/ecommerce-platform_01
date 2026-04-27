@@ -1,4 +1,5 @@
 const Product = require("../models/Product");
+const HomeSettings = require("../models/HomeSettings");
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
@@ -221,6 +222,32 @@ const semanticSearch = async (req, res) => {
   }
 };
 
+const getCategories = async (req, res) => {
+  try {
+    const settings = await HomeSettings.findOne();
+    let categories = [];
+
+    if (settings && settings.bentoBox && settings.bentoBox.length > 0) {
+      categories = settings.bentoBox
+        .map((item) => item.title)
+        .filter((title) => title && title.trim() !== "");
+      // Unique categories
+      categories = Array.from(new Set(categories));
+    }
+
+    if (categories.length === 0) {
+      categories = await Product.distinct("category");
+      categories = categories.filter((cat) => cat && cat.trim() !== "");
+    }
+
+    res.status(200).json({ success: true, categories });
+  } catch (error) {
+    res
+      .status(500)
+      .json({ success: false, message: "Server Error", error: error.message });
+  }
+};
+
 module.exports = {
   createProduct,
   getProducts,
@@ -229,4 +256,5 @@ module.exports = {
   deleteProduct,
   uploadBulkProducts,
   semanticSearch,
+  getCategories,
 };

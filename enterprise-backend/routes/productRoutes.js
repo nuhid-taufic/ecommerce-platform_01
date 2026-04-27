@@ -9,10 +9,12 @@ const {
   getSingleProduct,
   updateProduct,
   deleteProduct,
+  getCategories,
 } = require("../controllers/productController");
 
 const { upload } = require("../config/cloudinary");
 
+router.get("/categories", getCategories);
 router.get("/search", semanticSearch);
 router.post("/", upload.single("image"), createProduct);
 router.get("/", getProducts);

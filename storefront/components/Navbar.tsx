@@ -17,7 +17,8 @@ import { useCartStore } from "@/store/cartStore";
 
 export default function Navbar() {
   const { user, login } = useAuthStore();
-  const { cartItems } = useCartStore();
+  const { items } = useCartStore();
+  const cartItems = items || [];
   const pathname = usePathname();
   const [isClient, setIsClient] = useState(false);
 
@@ -27,6 +28,22 @@ export default function Navbar() {
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const [isSearching, setIsSearching] = useState(false);
+  const [categories, setCategories] = useState<string[]>([]);
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/products/categories`);
+        const data = await res.json();
+        if (data.success) {
+          setCategories(data.categories); // Show all categories
+        }
+      } catch (error) {
+        console.error("Failed to fetch categories", error);
+      }
+    };
+    fetchCategories();
+  }, []);
 
   useEffect(() => {
     setIsClient(true);
@@ -125,21 +142,30 @@ export default function Navbar() {
           </Link>
         </div>
 
-        {}
-        {pathname === "/" && !isSearchOpen && (
-          <div className="hidden md:flex items-center gap-8 text-sm text-gray-500 font-medium absolute left-1/2 -translate-x-1/2">
-            <Link href="/shop" className="hover:text-black transition-colors">
-              Collections
-            </Link>
-            <Link href="/about" className="hover:text-black transition-colors">
-              Our Story
-            </Link>
-            <Link
-              href="/journal"
-              className="hover:text-black transition-colors"
-            >
-              Journal
-            </Link>
+        {/* 2. Dynamic Categories Navigation */}
+        {!isSearchOpen && (
+          <div className="hidden md:flex items-center gap-10 text-xs font-bold uppercase tracking-[0.15em] absolute left-1/2 -translate-x-1/2">
+            {categories.map((cat) => (
+              <Link
+                key={cat}
+                href={`/shop?category=${encodeURIComponent(cat)}`}
+                className={`transition-all duration-300 ${
+                  pathname === "/shop" &&
+                  new URLSearchParams(
+                    typeof window !== "undefined" ? window.location.search : "",
+                  ).get("category") === cat
+                    ? "text-black scale-110"
+                    : "text-gray-400 hover:text-black hover:scale-105"
+                }`}
+              >
+                {cat}
+              </Link>
+            ))}
+            {categories.length === 0 && (
+              <Link href="/shop" className="text-gray-400 hover:text-black">
+                Shop All
+              </Link>
+            )}
           </div>
         )}
 
@@ -297,28 +323,21 @@ export default function Navbar() {
 
       {/* Mobile Navigation Menu */}
       {isMobileMenuOpen && (
-        <div className="md:hidden absolute top-full left-0 w-full bg-white border-b border-gray-100 shadow-lg z-40 py-4 px-6 flex flex-col gap-4 animate-in slide-in-from-top-2">
-          <Link
-            href="/shop"
-            onClick={() => setIsMobileMenuOpen(false)}
-            className="text-sm font-bold uppercase tracking-widest text-black hover:text-gray-500 py-2"
-          >
-            Collections
-          </Link>
-          <Link
-            href="/about"
-            onClick={() => setIsMobileMenuOpen(false)}
-            className="text-sm font-bold uppercase tracking-widest text-black hover:text-gray-500 py-2"
-          >
-            Our Story
-          </Link>
-          <Link
-            href="/journal"
-            onClick={() => setIsMobileMenuOpen(false)}
-            className="text-sm font-bold uppercase tracking-widest text-black hover:text-gray-500 py-2"
-          >
-            Journal
-          </Link>
+        <div className="md:hidden absolute top-full left-0 w-full bg-white border-b border-gray-100 shadow-xl z-40 py-8 px-8 flex flex-col gap-6 animate-in slide-in-from-top-4 duration-300">
+          <p className="text-[10px] font-black uppercase tracking-widest text-gray-300 mb-2">Categories</p>
+          {categories.map((cat) => (
+            <Link
+              key={cat}
+              href={`/shop?category=${encodeURIComponent(cat)}`}
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="text-lg font-bold uppercase tracking-tight text-black hover:text-gray-500"
+            >
+              {cat}
+            </Link>
+          ))}
+          <div className="pt-6 border-t border-gray-50 mt-2 flex flex-col gap-4">
+             <Link href="/shop" onClick={() => setIsMobileMenuOpen(false)} className="text-sm font-bold uppercase tracking-widest text-gray-400">View All Collection</Link>
+          </div>
         </div>
       )}
     </nav>
