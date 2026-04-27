@@ -105,6 +105,7 @@ export default function CartPage() {
   const [isCheckoutLoading, setIsCheckoutLoading] = useState(false);
   const { user, updateUser } = useAuthStore();
   const [paymentMethod, setPaymentMethod] = useState<"COD" | "SSL">("SSL");
+  const [orderNote, setOrderNote] = useState("");
 
   // Address Management States
   const [savedAddresses, setSavedAddresses] = useState<any[]>([]);
@@ -245,6 +246,7 @@ export default function CartPage() {
             allAddresses: savedAddresses,
             paymentMethod,
             totalAmount: finalTotal,
+            orderNote,
           }),
         },
       );
@@ -421,6 +423,19 @@ export default function CartPage() {
                     ${finalTotal.toFixed(2)}
                   </span>
                 </div>
+              </div>
+
+              {/* Order Note */}
+              <div className="space-y-3 mb-8">
+                <h3 className="text-[10px] font-bold uppercase text-gray-400 tracking-widest mb-4">
+                  Order Note (Optional)
+                </h3>
+                <textarea
+                  value={orderNote}
+                  onChange={(e) => setOrderNote(e.target.value)}
+                  placeholder="Notes about your order, e.g. special notes for delivery."
+                  className="w-full border border-gray-200 rounded-xl p-4 text-sm focus:border-black outline-none transition-colors resize-none min-h-[100px]"
+                ></textarea>
               </div>
 
               {/* Payment Methods Restored to the liked Radio Button Design */}

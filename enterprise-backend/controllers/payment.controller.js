@@ -17,6 +17,7 @@ exports.createOrder = async (req, res) => {
       allAddresses,
       paymentMethod,
       totalAmount,
+      orderNote,
     } = req.body;
     const tran_id = "ORD_" + new Date().getTime();
 
@@ -69,6 +70,7 @@ exports.createOrder = async (req, res) => {
         paymentMethod: "COD",
         paymentStatus: "Pending",
         orderStatus: "Processing",
+        orderNote: orderNote,
       });
       await newOrder.save();
 
@@ -96,6 +98,7 @@ exports.createOrder = async (req, res) => {
         paymentMethod: "SSL",
         paymentStatus: "Pending",
         orderStatus: "Pending",
+        orderNote: orderNote,
       });
       await newOrder.save();
 

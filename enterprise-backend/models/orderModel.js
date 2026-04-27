@@ -21,6 +21,7 @@ const orderSchema = new mongoose.Schema(
     paymentStatus: { type: String, default: "Paid" },
     orderStatus: { type: String, default: "Processing" }, // Processing, Delivered, Cancelled
     refundMessage: { type: String },
+    orderNote: { type: String },
 
     trackingHistory: [
       {
