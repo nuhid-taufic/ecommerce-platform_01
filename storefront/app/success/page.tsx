@@ -1,12 +1,15 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React, { useEffect, Suspense } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { ShoppingBag, Check, ArrowRight, Package } from "lucide-react";
 import { useCartStore } from "../../store/cartStore.js";
 
-export default function SuccessPage() {
+function SuccessContent() {
   const { clearCart } = useCartStore();
+  const searchParams = useSearchParams();
+  const orderId = searchParams.get("orderId");
 
   useEffect(() => {
     clearCart();
@@ -47,8 +50,8 @@ export default function SuccessPage() {
               <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1">
                 Order Number
               </p>
-              <p className="font-medium text-lg">
-                ORD-{Math.floor(100000 + Math.random() * 900000)}
+              <p className="font-black text-xl tracking-tight">
+                {orderId || "Processing..."}
               </p>
             </div>
             <div className="w-12 h-12 bg-gray-50 rounded-full flex items-center justify-center">
@@ -73,5 +76,13 @@ export default function SuccessPage() {
         </div>
       </main>
     </div>
+  );
+}
+
+export default function SuccessPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <SuccessContent />
+    </Suspense>
   );
 }

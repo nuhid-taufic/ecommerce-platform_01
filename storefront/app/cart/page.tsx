@@ -170,7 +170,7 @@ export default function CartPage() {
           window.location.href = data.gatewayUrl;
         } else {
           clearCart();
-          router.push("/success");
+          router.push(`/success?orderId=${data.orderId}`);
         }
       } else {
         toast.error(data.message || "Failed to process order");
@@ -518,15 +518,15 @@ export default function CartPage() {
               <div className="space-y-3 mb-6">
                 <div className="flex justify-between items-center text-sm">
                   <span className="text-gray-600">Sub total</span>
-                  <span className="font-medium text-gray-800">{totalPrice.toFixed(2)} BDT</span>
+                  <span className="font-medium text-gray-800">৳{totalPrice.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between items-center text-sm">
                   <span className="text-gray-600">Delivery cost</span>
-                  <span className="font-medium text-gray-800">{shippingCost === 0 ? "0 BDT" : `${shippingCost.toFixed(2)} BDT`}</span>
+                  <span className="font-medium text-gray-800">{shippingCost === 0 ? "৳0.00" : `৳${shippingCost.toFixed(2)}`}</span>
                 </div>
                 <div className="flex justify-between items-center pt-3 border-t border-gray-100 mt-3">
                   <span className="font-bold text-gray-800">Total</span>
-                  <span className="text-lg font-bold text-gray-900">{finalTotal.toFixed(2)} BDT</span>
+                  <span className="text-lg font-bold text-gray-900">৳{finalTotal.toFixed(2)}</span>
                 </div>
               </div>
 

@@ -5,11 +5,12 @@ const Product = require("../models/Product");
 const getDashboardStats = async (req, res) => {
   try {
     // --- Lifetime Stats ---
-    const totalOrders = await Order.countDocuments();
+    const totalOrders = await Order.countDocuments({ orderStatus: "Delivered" });
     const totalProducts = await Product.countDocuments();
     const totalCustomers = await User.countDocuments({ role: "customer" });
 
     const revenueResult = await Order.aggregate([
+      { $match: { orderStatus: "Delivered" } },
       { $group: { _id: null, total: { $sum: "$totalAmount" } } },
     ]);
     const totalRevenue = revenueResult.length > 0 ? revenueResult[0].total : 0;
@@ -26,7 +27,7 @@ const getDashboardStats = async (req, res) => {
       });
     }
 
-    const allOrders = await Order.find({}, "totalAmount createdAt");
+    const allOrders = await Order.find({ orderStatus: "Delivered" }, "totalAmount createdAt");
     allOrders.forEach((order) => {
       const orderMonth = new Date(order.createdAt).getMonth();
       const index = chartData.findIndex((c) => c.monthNum === orderMonth);
@@ -46,6 +47,7 @@ const getDashboardStats = async (req, res) => {
 
     // 1. Last 7 days orders & revenue
     const recentOrders = await Order.find({
+      orderStatus: "Delivered",
       createdAt: { $gte: sevenDaysAgo },
     });
     const last7DaysOrders = recentOrders.length;
@@ -62,15 +64,16 @@ const getDashboardStats = async (req, res) => {
 
     // 3. Top 10 Trending Products
     const topProductsResult = await Order.aggregate([
-      { $unwind: "$products" }, // Order er vitorer product array ke venge fela
+      { $match: { orderStatus: "Delivered" } },
+      { $unwind: "$items" }, // Changed from products to items to match new model
       {
         $group: {
-          _id: "$products.productId",
-          name: { $first: "$products.name" },
-          totalSold: { $sum: "$products.quantity" }, // Koyta sell hoyeche
+          _id: "$items.product",
+          name: { $first: "$items.name" },
+          totalSold: { $sum: "$items.quantity" },
           totalRevenue: {
-            $sum: { $multiply: ["$products.price", "$products.quantity"] },
-          }, // Total koto takar sell hoyeche
+            $sum: { $multiply: ["$items.price", "$items.quantity"] },
+          },
         },
       },
       { $sort: { totalSold: -1 } }, // Beshi theke kom e sajano

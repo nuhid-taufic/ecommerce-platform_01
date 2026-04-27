@@ -8,6 +8,15 @@ const store_id = process.env.STORE_ID || "testbox";
 const store_passwd = process.env.STORE_PASSWORD || "qwerty";
 const is_live = false;
 
+const generateOrderNumber = () => {
+  const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+  let result = "";
+  for (let i = 0; i < 6; i++) {
+    result += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return `ST-${result}`;
+};
+
 exports.createOrder = async (req, res) => {
   try {
     const {
@@ -20,6 +29,7 @@ exports.createOrder = async (req, res) => {
       orderNote,
     } = req.body;
     const tran_id = "ORD_" + new Date().getTime();
+    const orderNumber = generateOrderNumber();
 
     const customer = await Customer.findOne({ email: customerEmail });
     let customerId = null;
@@ -69,8 +79,9 @@ exports.createOrder = async (req, res) => {
         totalAmount: totalAmount,
         paymentMethod: "COD",
         paymentStatus: "Pending",
-        orderStatus: "Processing",
+        orderStatus: "Pending",
         orderNote: orderNote,
+        orderNumber: orderNumber,
       });
       await newOrder.save();
 
@@ -85,7 +96,7 @@ exports.createOrder = async (req, res) => {
         .json({
           success: true,
           message: "Order placed successfully via COD",
-          orderId: tran_id,
+          orderId: orderNumber,
         });
     } else if (paymentMethod === "SSL") {
       const newOrder = new Order({
@@ -99,6 +110,7 @@ exports.createOrder = async (req, res) => {
         paymentStatus: "Pending",
         orderStatus: "Pending",
         orderNote: orderNote,
+        orderNumber: orderNumber,
       });
       await newOrder.save();
 

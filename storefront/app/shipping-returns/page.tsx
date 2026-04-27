@@ -32,11 +32,11 @@ export default function ShippingReturnsPage() {
               </li>
               <li className="flex justify-between border-b border-gray-100 pb-2">
                 <span>Express Shipping (1-2 days)</span>
-                <span className="font-medium text-black">$15.00</span>
+                <span className="font-medium text-black">৳150.00</span>
               </li>
               <li className="flex justify-between pb-2">
                 <span>International (7-14 days)</span>
-                <span className="font-medium text-black">$25.00</span>
+                <span className="font-medium text-black">৳250.00</span>
               </li>
             </ul>
             <p className="text-xs text-gray-400 mt-6 mt-4">

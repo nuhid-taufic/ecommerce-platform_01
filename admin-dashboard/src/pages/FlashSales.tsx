@@ -247,7 +247,7 @@ export default function FlashSales() {
                         {p.productId?.name || "Product"}
                       </span>
                       <span className="font-bold text-emerald-600">
-                        ${p.salePrice}
+                        ৳{p.salePrice}
                       </span>
                     </div>
                   ))}
@@ -342,7 +342,7 @@ export default function FlashSales() {
                         <option value="">-- Choose a Product --</option>
                         {products.map((p) => (
                           <option key={p._id} value={p._id}>
-                            {p.name} (Original: ${p.price})
+                            {p.name} (Original: ৳{p.price})
                           </option>
                         ))}
                       </select>
@@ -351,7 +351,7 @@ export default function FlashSales() {
                       <input
                         type="number"
                         min="0"
-                        placeholder="Sale Price ($)"
+                        placeholder="Sale Price (৳)"
                         value={currentSalePrice}
                         onChange={(e) => setCurrentSalePrice(e.target.value)}
                         className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-amber-500 text-sm font-bold"
@@ -382,12 +382,12 @@ export default function FlashSales() {
                               {p.name}
                             </p>
                             <p className="text-xs text-slate-500 line-through">
-                              Original: ${p.originalPrice}
+                              Original: ৳{p.originalPrice}
                             </p>
                           </div>
                           <div className="flex items-center gap-4">
                             <span className="font-black text-emerald-600">
-                              ${p.salePrice}
+                              ৳{p.salePrice}
                             </span>
                             <button
                               type="button"

@@ -99,7 +99,7 @@ export default function Analytics() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <StatCard
           title="Total Revenue"
-          value={`$${data.stats.totalRevenue.toLocaleString()}`}
+          value={`৳${data.stats.totalRevenue.toLocaleString()}`}
           icon={<DollarSign className="h-6 w-6 text-emerald-600" />}
           bg="bg-emerald-100"
         />
@@ -141,7 +141,7 @@ export default function Analytics() {
                 <YAxis
                   stroke="#94a3b8"
                   fontSize={12}
-                  tickFormatter={(value) => `$${value}`}
+                  tickFormatter={(value) => `৳${value}`}
                 />
                 <Tooltip
                   contentStyle={{

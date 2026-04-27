@@ -213,7 +213,7 @@ const Dashboard = ({ orders, loading }: { orders: any[]; loading: boolean }) => 
             <div className="p-3 bg-purple-50 rounded-xl"><CreditCard size={24} className="text-purple-600" /></div>
             <span className="text-xs font-bold text-purple-400 uppercase tracking-widest">Spent</span>
           </div>
-          <p className="text-4xl font-bold text-purple-600">${totalSpent.toFixed(0)}</p>
+          <p className="text-4xl font-bold text-purple-600">৳{totalSpent.toFixed(0)}</p>
           <p className="text-sm text-gray-500 mt-2">Lifetime value</p>
         </div>
       </div>
@@ -226,7 +226,7 @@ const Dashboard = ({ orders, loading }: { orders: any[]; loading: boolean }) => 
               <div key={idx} className="flex items-center justify-between bg-white p-6 rounded-2xl border border-gray-100 shadow-sm hover:border-black transition-all">
                 <div className="flex items-center gap-5">
                   <div className="w-12 h-12 bg-gray-50 rounded-full flex items-center justify-center text-sm font-bold">
-                    #{order.tran_id?.slice(-2) || order._id?.slice(-2)}
+                    #{order.orderNumber || order.tran_id || order._id}
                   </div>
                   <div>
                     <p className="text-base font-bold">{order.orderStatus}</p>
@@ -234,7 +234,7 @@ const Dashboard = ({ orders, loading }: { orders: any[]; loading: boolean }) => 
                   </div>
                 </div>
                 <div className="text-right">
-                  <p className="text-base font-bold">${order.totalAmount?.toFixed(2)}</p>
+                  <p className="text-base font-bold">৳{order.totalAmount?.toFixed(2)}</p>
                   <p className="text-xs text-gray-400 font-semibold uppercase tracking-wider">Amount Paid</p>
                 </div>
               </div>
@@ -281,11 +281,11 @@ const TraceOrder = ({ orders, loading }: { orders: any[]; loading: boolean }) =>
             <div className="flex justify-between items-start mb-8">
               <div>
                 <p className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">Reference ID</p>
-                <p className="text-base font-bold">#{order.tran_id?.slice(-12) || order._id?.slice(-12)}</p>
+                <p className="text-base font-bold">#{order.orderNumber || order.tran_id || order._id}</p>
               </div>
               <div className="text-right">
                 <p className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">Order Value</p>
-                <p className="text-lg font-bold text-black">${order.totalAmount?.toFixed(2)}</p>
+                <p className="text-lg font-bold text-black">৳{order.totalAmount?.toFixed(2)}</p>
               </div>
             </div>
             

@@ -2,35 +2,59 @@ const mongoose = require("mongoose");
 
 const orderSchema = new mongoose.Schema(
   {
-    stripeSessionId: {
+    tran_id: {
       type: String,
-      required: false,
+      required: true,
       unique: true,
-      sparse: true,
     },
-    products: [
+    orderNumber: {
+      type: String,
+      unique: true,
+    },
+    customer: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    },
+    customerEmail: {
+      type: String,
+      required: true,
+    },
+    items: [
       {
-        productId: { type: mongoose.Schema.Types.ObjectId, ref: "Product" },
+        product: { type: mongoose.Schema.Types.ObjectId, ref: "Product" },
         name: String,
         quantity: { type: Number, required: true },
         price: { type: Number, required: true },
+        image: String,
       },
     ],
     totalAmount: { type: Number, required: true },
 
-    paymentStatus: { type: String, default: "Paid" },
-    orderStatus: { type: String, default: "Processing" }, // Processing, Delivered, Cancelled
-    refundMessage: { type: String },
+    paymentMethod: { type: String, default: "COD" }, // COD, SSL
+    paymentStatus: { type: String, default: "Pending" },
+    orderStatus: { type: String, default: "Pending" }, // Pending, Processing, Shipped, Delivered, Cancelled
+    
+    courierName: { type: String }, // For 'Shipped' stage
+    
+    shippingInfo: {
+      name: String,
+      phone: String,
+      street: String,
+      district: String,
+      division: String,
+      apartment: String,
+      postcode: String,
+    },
+
     orderNote: { type: String },
 
     trackingHistory: [
       {
-        location: { type: String, required: true },
-        message: { type: String, required: true },
+        location: { type: String },
+        message: { type: String },
         timestamp: { type: Date, default: Date.now },
       },
     ],
-    customerEmail: { type: String },
   },
   { timestamps: true },
 );

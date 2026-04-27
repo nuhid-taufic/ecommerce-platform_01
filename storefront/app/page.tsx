@@ -171,13 +171,13 @@ export default function HomePage() {
                   <div className="flex items-center gap-3">
                     {slide.originalPrice && (
                       <span className="text-sm text-gray-400 line-through">
-                        ${slide.originalPrice}
+                        ৳{slide.originalPrice}
                       </span>
                     )}
                     <span
                       className={`text-lg font-medium ${slide.isFlashSale ? "text-red-500 font-bold" : ""}`}
                     >
-                      ${slide.price}
+                      ৳{slide.price}
                     </span>
                   </div>
                 </div>

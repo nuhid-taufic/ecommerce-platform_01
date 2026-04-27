@@ -143,11 +143,11 @@ export default function Coupons() {
                 <p className="text-3xl font-black text-emerald-600">
                   {coupon.discountType === "percentage"
                     ? `${coupon.discountValue}%`
-                    : `$${coupon.discountValue}`}{" "}
+                    : `৳${coupon.discountValue}`}{" "}
                   <span className="text-sm font-bold text-slate-400">OFF</span>
                 </p>
                 <p className="text-xs font-bold text-slate-500 mt-1">
-                  Min. Order: ${coupon.minOrderAmount}
+                  Min. Order: ৳{coupon.minOrderAmount}
                 </p>
               </div>
 
@@ -213,7 +213,7 @@ export default function Coupons() {
                     className="w-full px-4 py-2 mt-1 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500"
                   >
                     <option value="percentage">Percentage (%)</option>
-                    <option value="fixed">Fixed Amount ($)</option>
+                    <option value="fixed">Fixed Amount (৳)</option>
                   </select>
                 </div>
                 <div>
@@ -239,7 +239,7 @@ export default function Coupons() {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="text-xs font-bold text-slate-500 uppercase">
-                    Min Order ($)
+                    Min Order (৳)
                   </label>
                   <input
                     type="number"
