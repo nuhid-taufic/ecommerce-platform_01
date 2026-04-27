@@ -257,12 +257,13 @@ export default function Navbar() {
             )}
           </div>
 
-          {/* Cart Icon */}
+          {/* Cart Option */}
           <Link
             href="/cart"
-            className="relative text-gray-900 hover:opacity-70 transition-opacity flex items-center"
+            className="relative flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-gray-900 hover:text-gray-500 transition-colors"
           >
             <ShoppingBag className="h-5 w-5 stroke-[1.5]" />
+            <span className="hidden sm:inline">Cart</span>
             {cartItems.length > 0 && (
               <span className="absolute -top-2 -right-2 bg-red-500 text-white text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center">
                 {cartItems.length}
