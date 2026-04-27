@@ -44,10 +44,9 @@ export default function Dashboard() {
   }, []);
 
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: "USD",
-    }).format(amount);
+    return `৳${new Intl.NumberFormat("en-BD", {
+      maximumFractionDigits: 0,
+    }).format(amount)}`;
   };
 
   const formatNumber = (num: number) => {
@@ -145,7 +144,7 @@ export default function Dashboard() {
                   fontSize={12}
                   tickLine={false}
                   axisLine={false}
-                  tickFormatter={(value) => `$${value}`}
+                  tickFormatter={(value) => `৳${value}`}
                 />
                 <CartesianGrid
                   strokeDasharray="3 3"
@@ -162,7 +161,7 @@ export default function Dashboard() {
                     color: "hsl(var(--foreground))",
                     fontWeight: "bold",
                   }}
-                  formatter={(value: number) => [`$${value}`, "Revenue"]}
+                  formatter={(value: number) => [`৳${value}`, "Revenue"]}
                 />
                 <Area
                   type="monotone"

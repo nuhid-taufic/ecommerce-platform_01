@@ -156,7 +156,7 @@ export default function Customers() {
                     Total Spent
                   </p>
                   <p className="text-xl font-black text-emerald-400">
-                    ${customer.totalSpent}
+                    ৳{customer.totalSpent}
                   </p>
                 </div>
                 <div className="text-right">
@@ -234,7 +234,7 @@ export default function Customers() {
                       {customer.totalOrders}
                     </td>
                     <td className="p-4 text-right font-black text-emerald-600">
-                      ${customer.totalSpent}
+                      ৳{customer.totalSpent}
                     </td>
                     <td className="p-4 text-center">
                       <button
@@ -307,7 +307,7 @@ export default function Customers() {
                           Lifetime Spent
                         </p>
                         <p className="text-xl font-black text-emerald-600">
-                          ${selectedCustomer.totalSpent}
+                          ৳{selectedCustomer.totalSpent}
                         </p>
                       </div>
                     </div>
@@ -420,7 +420,7 @@ export default function Customers() {
                                     </div>
                                     <div className="flex items-center gap-4">
                                       <span className="font-black text-slate-800">
-                                        ${order.total}
+                                        ৳{order.total}
                                       </span>
 
                                       {/* CANCEL ORDER BUTTON */}
@@ -470,7 +470,7 @@ export default function Customers() {
                                         </span>
                                       </div>
                                       <span className="font-bold text-slate-600">
-                                        ${order.total}
+                                        ৳{order.total}
                                       </span>
                                     </div>
                                     <p className="text-xs text-slate-500 mb-2">

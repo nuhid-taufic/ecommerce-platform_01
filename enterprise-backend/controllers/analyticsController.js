@@ -4,8 +4,9 @@ const User = require("../models/User");
 
 const getDashboardAnalytics = async (req, res) => {
   try {
-    const totalOrders = await Order.countDocuments();
+    const totalOrders = await Order.countDocuments({ orderStatus: "Delivered" });
     const revenueAgg = await Order.aggregate([
+      { $match: { orderStatus: "Delivered" } },
       { $group: { _id: null, total: { $sum: "$totalAmount" } } },
     ]);
     const totalRevenue = revenueAgg.length > 0 ? revenueAgg[0].total : 0;
@@ -19,6 +20,7 @@ const getDashboardAnalytics = async (req, res) => {
     ]);
 
     const monthlySalesRaw = await Order.aggregate([
+      { $match: { orderStatus: "Delivered" } },
       {
         $group: {
           _id: {

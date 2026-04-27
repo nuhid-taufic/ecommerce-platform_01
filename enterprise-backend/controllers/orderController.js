@@ -1,4 +1,5 @@
 const Order = require("../models/orderModel");
+const Product = require("../models/Product");
 
 const getUserOrders = async (req, res) => {
   try {
@@ -55,18 +56,34 @@ const updateOrderTracking = async (req, res) => {
 const updateOrderStatus = async (req, res) => {
   try {
     const { id } = req.params;
-    const { orderStatus } = req.body;
+    const { orderStatus, courierName } = req.body;
+
+    const updateData = { orderStatus };
+    if (courierName) {
+      updateData.courierName = courierName;
+    }
 
     const order = await Order.findByIdAndUpdate(
       id,
-      { orderStatus: orderStatus },
+      updateData,
       { new: true },
-    );
+    ).populate("items.product");
 
     if (!order) {
       return res
         .status(404)
         .json({ success: false, message: "Order not found" });
+    }
+
+    // If marked as Delivered, increment totalSold for each product
+    if (orderStatus === "Delivered") {
+      for (const item of order.items) {
+        if (item.product) {
+          await Product.findByIdAndUpdate(item.product._id, {
+            $inc: { totalSold: item.quantity },
+          });
+        }
+      }
     }
 
     res

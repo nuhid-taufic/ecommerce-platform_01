@@ -631,13 +631,13 @@ export default function ProductDetailsPage() {
                       <div className="flex items-center gap-2">
                         {item.originalPrice && (
                           <span className="text-gray-400 text-xs line-through">
-                            ${item.originalPrice}
+                            ৳{item.originalPrice}
                           </span>
                         )}
                         <p
                           className={`text-sm font-light ${item.isFlashSale ? "text-red-500 font-bold" : "text-gray-500"}`}
                         >
-                          ${item.price}
+                          ৳{item.price}
                         </p>
                       </div>
                       <p className="text-[10px] uppercase tracking-widest text-gray-400 mt-0.5">

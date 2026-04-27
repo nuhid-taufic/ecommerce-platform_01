@@ -40,12 +40,14 @@ export default function Products() {
   const [uploadForm, setUploadForm] = useState({
     name: "",
     price: "",
-    currency: "USD",
+    currency: "BDT",
     category: "",
     customCategory: "",
     description: "",
     stock: "",
     image: "",
+    images: [] as string[],
+    benefits: [] as string[],
   });
   const [isUploadingImage, setIsUploadingImage] = useState(false);
 
@@ -81,9 +83,7 @@ export default function Products() {
   };
 
   const getCurrencySymbol = (currencyCode: string) => {
-    if (currencyCode === "BDT") return "৳";
-    if (currencyCode === "EUR") return "€";
-    return "$";
+    return "৳";
   };
 
   const filteredProducts = useMemo(() => {
@@ -99,10 +99,10 @@ export default function Products() {
         categoryFilter === "" || product.category === categoryFilter;
 
       let matchesPrice = true;
-      if (priceFilter === "under50") matchesPrice = product.price < 50;
-      if (priceFilter === "50to200")
-        matchesPrice = product.price >= 50 && product.price <= 200;
-      if (priceFilter === "over200") matchesPrice = product.price > 200;
+      if (priceFilter === "under500") matchesPrice = product.price < 500;
+      if (priceFilter === "500to2000")
+        matchesPrice = product.price >= 500 && product.price <= 2000;
+      if (priceFilter === "over2000") matchesPrice = product.price > 2000;
 
       return matchesSearch && matchesCategory && matchesPrice;
     });
@@ -220,7 +220,9 @@ export default function Products() {
             category: editForm.category,
             stock: Number(editForm.stock),
             description: editForm.description,
-            image: editForm.image, // Updated image link
+            image: editForm.image,
+            images: editForm.images || [editForm.image],
+            benefits: editForm.benefits || [],
           }),
         },
       );
@@ -317,12 +319,14 @@ export default function Products() {
         setUploadForm({
           name: "",
           price: "",
-          currency: "USD",
+          currency: "BDT",
           category: "",
           customCategory: "",
           description: "",
           stock: "",
           image: "",
+          images: [],
+          benefits: [],
         });
       } else {
         toast.error(data.message || "Failed to publish!", { id: toastId });
@@ -463,9 +467,9 @@ export default function Products() {
             className="px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium text-slate-700"
           >
             <option value="">Any Price</option>
-            <option value="under50">Under $50</option>
-            <option value="50to200">$50 - $200</option>
-            <option value="over200">Over $200</option>
+            <option value="under500">Under ৳500</option>
+            <option value="500to2000">৳500 - ৳2000</option>
+            <option value="over2000">Over ৳2000</option>
           </select>
         </div>
       </div>
@@ -772,13 +776,93 @@ export default function Products() {
                   </div>
 
                   <div className="space-y-1 md:col-span-2">
+                    <label className="text-xs font-bold text-slate-500 uppercase flex justify-between">
+                      Gallery Images
+                      <button
+                        type="button"
+                        onClick={() => setEditForm({ ...editForm, images: [...(editForm.images || []), ""] })}
+                        className="text-blue-500 hover:underline"
+                      >
+                        + Add Image URL
+                      </button>
+                    </label>
+                    <div className="space-y-2">
+                      {(editForm.images || []).map((img: string, idx: number) => (
+                        <div key={idx} className="flex gap-2">
+                          <input
+                            type="text"
+                            placeholder="https://..."
+                            value={img}
+                            onChange={(e) => {
+                              const newImgs = [...editForm.images];
+                              newImgs[idx] = e.target.value;
+                              setEditForm({ ...editForm, images: newImgs });
+                            }}
+                            className="flex-1 px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const newImgs = editForm.images.filter((_: any, i: number) => i !== idx);
+                              setEditForm({ ...editForm, images: newImgs });
+                            }}
+                            className="p-2 text-red-500 hover:bg-red-50 rounded-lg"
+                          >
+                            <Trash2 size={16} />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="space-y-1 md:col-span-2">
+                    <label className="text-xs font-bold text-slate-500 uppercase flex justify-between">
+                      Benefits / Highlights
+                      <button
+                        type="button"
+                        onClick={() => setEditForm({ ...editForm, benefits: [...(editForm.benefits || []), ""] })}
+                        className="text-blue-500 hover:underline"
+                      >
+                        + Add Benefit
+                      </button>
+                    </label>
+                    <div className="space-y-2">
+                      {(editForm.benefits || []).map((benefit: string, idx: number) => (
+                        <div key={idx} className="flex gap-2">
+                          <input
+                            type="text"
+                            placeholder="Premium Quality, etc."
+                            value={benefit}
+                            onChange={(e) => {
+                              const newBenefits = [...editForm.benefits];
+                              newBenefits[idx] = e.target.value;
+                              setEditForm({ ...editForm, benefits: newBenefits });
+                            }}
+                            className="flex-1 px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const newBenefits = editForm.benefits.filter((_: any, i: number) => i !== idx);
+                              setEditForm({ ...editForm, benefits: newBenefits });
+                            }}
+                            className="p-2 text-red-500 hover:bg-red-50 rounded-lg"
+                          >
+                            <Trash2 size={16} />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="space-y-1 md:col-span-2">
                     <div className="flex justify-between">
                       <label className="text-xs font-bold text-slate-500 uppercase">
                         Description
                       </label>
                     </div>
                     <textarea
-                      maxLength={300}
+                      maxLength={500}
                       required
                       rows={3}
                       value={editForm.description}
@@ -933,8 +1017,8 @@ export default function Products() {
                           }
                           className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500"
                         >
-                          <option value="USD">USD ($)</option>
                           <option value="BDT">BDT (৳)</option>
+                          <option value="USD">USD ($)</option>
                           <option value="EUR">EUR (€)</option>
                         </select>
                       </div>
@@ -1005,16 +1089,96 @@ export default function Products() {
                     </div>
 
                     <div className="space-y-1 md:col-span-2">
+                      <label className="text-xs font-bold text-slate-500 uppercase flex justify-between">
+                        Gallery Images
+                        <button
+                          type="button"
+                          onClick={() => setUploadForm({ ...uploadForm, images: [...uploadForm.images, ""] })}
+                          className="text-blue-500 hover:underline"
+                        >
+                          + Add Image URL
+                        </button>
+                      </label>
+                      <div className="space-y-2">
+                        {uploadForm.images.map((img: string, idx: number) => (
+                          <div key={idx} className="flex gap-2">
+                            <input
+                              type="text"
+                              placeholder="https://..."
+                              value={img}
+                              onChange={(e) => {
+                                const newImgs = [...uploadForm.images];
+                                newImgs[idx] = e.target.value;
+                                setUploadForm({ ...uploadForm, images: newImgs });
+                              }}
+                              className="flex-1 px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const newImgs = uploadForm.images.filter((_: any, i: number) => i !== idx);
+                                setUploadForm({ ...uploadForm, images: newImgs });
+                              }}
+                              className="p-2 text-red-500 hover:bg-red-50 rounded-lg"
+                            >
+                              <Trash2 size={16} />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="space-y-1 md:col-span-2">
+                      <label className="text-xs font-bold text-slate-500 uppercase flex justify-between">
+                        Benefits / Highlights
+                        <button
+                          type="button"
+                          onClick={() => setUploadForm({ ...uploadForm, benefits: [...uploadForm.benefits, ""] })}
+                          className="text-blue-500 hover:underline"
+                        >
+                          + Add Benefit
+                        </button>
+                      </label>
+                      <div className="space-y-2">
+                        {uploadForm.benefits.map((benefit: string, idx: number) => (
+                          <div key={idx} className="flex gap-2">
+                            <input
+                              type="text"
+                              placeholder="Premium Quality, etc."
+                              value={benefit}
+                              onChange={(e) => {
+                                const newBenefits = [...uploadForm.benefits];
+                                newBenefits[idx] = e.target.value;
+                                setUploadForm({ ...uploadForm, benefits: newBenefits });
+                              }}
+                              className="flex-1 px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const newBenefits = uploadForm.benefits.filter((_: any, i: number) => i !== idx);
+                                setUploadForm({ ...uploadForm, benefits: newBenefits });
+                              }}
+                              className="p-2 text-red-500 hover:bg-red-50 rounded-lg"
+                            >
+                              <Trash2 size={16} />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="space-y-1 md:col-span-2">
                       <div className="flex justify-between">
                         <label className="text-xs font-bold text-slate-500 uppercase">
                           Description
                         </label>
                         <span className="text-xs font-bold text-slate-400">
-                          {uploadForm.description.length}/300 characters
+                          {uploadForm.description.length}/500 characters
                         </span>
                       </div>
                       <textarea
-                        maxLength={300}
+                        maxLength={500}
                         required
                         rows={3}
                         value={uploadForm.description}

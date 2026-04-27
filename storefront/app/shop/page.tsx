@@ -31,6 +31,7 @@ function ShopContent() {
 
   const [categories, setCategories] = useState<string[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>("All");
+  const [maxInventoryPrice, setMaxInventoryPrice] = useState<number>(10000);
   const [priceRange, setPriceRange] = useState<number>(10000);
   const [searchQuery, setSearchQuery] = useState("");
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
@@ -60,12 +61,9 @@ function ShopContent() {
     (acc: number, item: any) => acc + item.price * item.quantity,
     0,
   );
-  const formatPrice = (amount: number) =>
-    new Intl.NumberFormat("en-BD", {
-      style: "currency",
-      currency: "BDT",
-      maximumFractionDigits: 2,
-    }).format(amount);
+  const formatPrice = (amount: number) => {
+    return `৳${amount.toFixed(2)}`;
+  };
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -104,6 +102,10 @@ function ShopContent() {
 
           setAllProducts(products);
           setAiSearchResults(products);
+
+          const maxPrice = products.length > 0 ? Math.max(...products.map((p: any) => p.price)) : 10000;
+          setMaxInventoryPrice(maxPrice);
+          setPriceRange(maxPrice);
 
           const uniqueCategories = Array.from(
             new Set(products.map((p: any) => p.category)),
@@ -196,7 +198,7 @@ function ShopContent() {
   const clearFilters = () => {
     setSelectedCategory("All");
     setSearchQuery("");
-    setPriceRange(10000);
+    setPriceRange(maxInventoryPrice);
     setAiSearchResults(allProducts);
   };
 
@@ -354,12 +356,12 @@ function ShopContent() {
 
             <div>
               <h3 className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-4">
-                Max Price: ${priceRange}
+                Max Price: ৳{priceRange}
               </h3>
               <input
                 type="range"
                 min="0"
-                max="10000"
+                max={maxInventoryPrice}
                 step="50"
                 value={priceRange}
                 onChange={(e) => setPriceRange(Number(e.target.value))}
@@ -470,13 +472,13 @@ function ShopContent() {
                         <div className="flex items-center gap-2">
                           {product.originalPrice && (
                             <span className="text-gray-400 text-xs line-through">
-                              ${product.originalPrice}
+                              ৳{product.originalPrice}
                             </span>
                           )}
                           <p
                             className={`text-sm sm:text-base font-black tracking-tight ${product.isFlashSale ? "text-red-500" : "text-black"}`}
                           >
-                            ${product.price}
+                            ৳{product.price}
                           </p>
                         </div>
                         <p className="text-[10px] uppercase tracking-widest text-gray-400 mt-0.5">
