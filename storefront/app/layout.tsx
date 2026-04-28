@@ -5,6 +5,7 @@ import { Toaster } from "react-hot-toast";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import SupportWidget from "@/components/SupportWidget";
+import FloatingCart from "@/components/FloatingCart";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -83,6 +84,7 @@ export default function RootLayout({
         <main>{children}</main>
         <Footer />
         <SupportWidget />
+        <FloatingCart />
       </body>
     </html>
   );
