@@ -39,11 +39,10 @@ const orderSchema = new mongoose.Schema(
     shippingInfo: {
       name: String,
       phone: String,
-      street: String,
+      addressLine: String,
       district: String,
-      division: String,
-      apartment: String,
-      postcode: String,
+      thana: String,
+      postalCode: String,
     },
 
     orderNote: { type: String },

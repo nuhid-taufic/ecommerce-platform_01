@@ -186,7 +186,7 @@ export default function Orders() {
                   <div className="flex-1">
                     <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Address</p>
                     <p className="text-sm text-slate-600 line-clamp-1">
-                      {order.shippingInfo?.street}, {order.shippingInfo?.district}
+                      {order.shippingInfo?.addressLine || order.shippingInfo?.street}, {order.shippingInfo?.thana && `${order.shippingInfo.thana}, `}{order.shippingInfo?.district}
                     </p>
                   </div>
                   <div>
@@ -300,11 +300,11 @@ export default function Orders() {
                     <MapPin size={14} /> Shipping Address
                   </h3>
                   <p className="text-slate-700 leading-relaxed font-bold">
-                    {selectedOrder.shippingInfo?.apartment ? `${selectedOrder.shippingInfo.apartment}, ` : ""}
-                    {selectedOrder.shippingInfo?.street}
+                    {selectedOrder.shippingInfo?.addressLine || selectedOrder.shippingInfo?.street}
                     <br />
                     <span className="text-slate-500 font-medium">
-                      {selectedOrder.shippingInfo?.district}, {selectedOrder.shippingInfo?.division} - {selectedOrder.shippingInfo?.postcode}
+                      {selectedOrder.shippingInfo?.thana && `${selectedOrder.shippingInfo.thana}, `}{selectedOrder.shippingInfo?.district} 
+                      {selectedOrder.shippingInfo?.postalCode ? ` - ${selectedOrder.shippingInfo.postalCode}` : ""}
                     </span>
                   </p>
                   {selectedOrder.courierName && (

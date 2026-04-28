@@ -17,27 +17,7 @@ import toast from "react-hot-toast";
 import { useCartStore } from "@/store/cartStore";
 import { useAuthStore } from "@/store/authStore";
 
-const bdDistricts: { [key: string]: string[] } = {
-  Dhaka: ["Dhaka", "Gazipur", "Narayanganj", "Tangail", "Faridpur", "Manikganj", "Munshiganj", "Rajbari", "Madaripur", "Gopalganj", "Narsingdi", "Shariatpur", "Kishoreganj"],
-  Chattogram: ["Chattogram", "Cox's Bazar", "Cumilla", "Feni", "Brahmanbaria", "Noakhali", "Lakshmipur", "Chandpur", "Rangamati", "Khagrachari", "Bandarban"],
-  Rajshahi: ["Rajshahi", "Pabna", "Bogra", "Naogaon", "Natore", "Chapai Nawabganj", "Sirajganj", "Joypurhat"],
-  Khulna: ["Khulna", "Jashore", "Satkhira", "Meherpur", "Narail", "Chuadanga", "Kushtia", "Magura", "Bagerhat", "Jhenaidah"],
-  Barishal: ["Barishal", "Bhola", "Patuakhali", "Pirojpur", "Jhalokati", "Barguna"],
-  Sylhet: ["Sylhet", "Moulvibazar", "Habiganj", "Sunamganj"],
-  Rangpur: ["Rangpur", "Dinajpur", "Kurigram", "Gaibandha", "Nilphamari", "Panchagarh", "Thakurgaon", "Lalmonirhat"],
-  Mymensingh: ["Mymensingh", "Netrokona", "Jamalpur", "Sherpur"],
-};
-
-const getDivisionByDistrict = (districtName: string) => {
-  if (!districtName) return "";
-  for (const [division, districts] of Object.entries(bdDistricts)) {
-    // Make case-insensitive match just in case
-    if (districts.some(d => d.toLowerCase() === districtName.toLowerCase())) {
-      return division;
-    }
-  }
-  return "";
-};
+import { bdDistricts, bdUpazilas } from "@/utils/bd-data";
 
 export default function CartPage() {
   const {
@@ -59,17 +39,17 @@ export default function CartPage() {
   const [shippingAddress, setShippingAddress] = useState({
     name: "",
     phone: "",
-    division: "",
-    district: "",
-    street: "",
+    district: "Dhaka",
+    thana: "",
+    addressLine: "",
   });
 
   const [billingAddress, setBillingAddress] = useState({
     name: "",
     phone: "",
-    division: "",
-    district: "",
-    street: "",
+    district: "Dhaka",
+    thana: "",
+    addressLine: "",
   });
 
   const [useShippingForBilling, setUseShippingForBilling] = useState(true);
@@ -79,6 +59,7 @@ export default function CartPage() {
   const [isCouponOpen, setIsCouponOpen] = useState(false);
   const [appliedCoupon, setAppliedCoupon] = useState<any>(null);
   const [isApplyingCoupon, setIsApplyingCoupon] = useState(false);
+  const [deliveryZone, setDeliveryZone] = useState("Inside Dhaka");
 
   const router = useRouter();
 
@@ -89,9 +70,9 @@ export default function CartPage() {
       setShippingAddress({
         name: defaultAddr.name || user.name || "",
         phone: "", // Do not autofill phone number
-        division: defaultAddr.division || getDivisionByDistrict(defaultAddr.district) || "",
-        district: defaultAddr.district || "",
-        street: defaultAddr.street || defaultAddr.addressLine || "",
+        district: defaultAddr.district || "Dhaka",
+        thana: defaultAddr.thana || "",
+        addressLine: defaultAddr.addressLine || defaultAddr.street || "",
       });
     }
   }, [user]);
@@ -107,7 +88,7 @@ export default function CartPage() {
     (acc: number, item: any) => acc + item.price * item.quantity,
     0,
   );
-  const shippingCost = totalPrice > 200 ? 0 : 15; // You can adjust this based on your logic
+  const shippingCost = deliveryZone === "Inside Dhaka" ? 60 : 120;
 
   let discountAmount = 0;
   if (appliedCoupon) {
@@ -155,7 +136,10 @@ export default function CartPage() {
   };
 
   const handleCheckout = async () => {
-    if (cartItems.length === 0) return;
+    if (cartItems.length === 0) {
+      toast.error("Your cart is empty. Please add items to checkout.");
+      return;
+    }
     
     if (!user) {
       toast.error("Please login first to place an order");
@@ -168,12 +152,12 @@ export default function CartPage() {
       return;
     }
 
-    if (!shippingAddress.name || !shippingAddress.phone || !shippingAddress.division || !shippingAddress.district || !shippingAddress.street) {
+    if (!shippingAddress.name || !shippingAddress.phone || !shippingAddress.district || !shippingAddress.thana || !shippingAddress.addressLine) {
       toast.error("Please fill all required shipping address fields.");
       return;
     }
 
-    if (!useShippingForBilling && (!billingAddress.name || !billingAddress.phone || !billingAddress.division || !billingAddress.district || !billingAddress.street)) {
+    if (!useShippingForBilling && (!billingAddress.name || !billingAddress.phone || !billingAddress.district || !billingAddress.thana || !billingAddress.addressLine)) {
       toast.error("Please fill all required billing address fields.");
       return;
     }
@@ -188,10 +172,10 @@ export default function CartPage() {
     
     const finalShippingInfo = {
       ...shippingAddress,
-      label: "Shipping",
+      type: "Shipping",
     };
 
-    const isAlreadySaved = user?.addresses?.some((a: any) => a.street === finalShippingInfo.street && a.district === finalShippingInfo.district);
+    const isAlreadySaved = user?.addresses?.some((a: any) => a.addressLine === finalShippingInfo.addressLine && a.thana === finalShippingInfo.thana && a.district === finalShippingInfo.district);
 
     if (user && saveAddress && !isAlreadySaved) {
       try {
@@ -313,21 +297,21 @@ export default function CartPage() {
                   <h3 className="text-sm font-bold mb-3 text-gray-800">Saved Addresses</h3>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
                     {user.addresses.map((addr: any, idx: number) => {
-                      const addrStreet = addr.street || addr.addressLine || "";
-                      const isSelected = shippingAddress.street === addrStreet && shippingAddress.district === addr.district;
+                      const addrLine = addr.addressLine || addr.street || "";
+                      const isSelected = shippingAddress.addressLine === addrLine && shippingAddress.district === addr.district && shippingAddress.thana === addr.thana;
                       return (
                         <div 
                           key={idx}
                           onClick={() => {
                             if (isSelected) {
-                              setShippingAddress({ name: "", phone: "", division: "", district: "", street: "" });
+                              setShippingAddress({ name: "", phone: "", district: "Dhaka", thana: "", addressLine: "" });
                             } else {
                               setShippingAddress({
                                 name: addr.name || user.name || "",
                                 phone: "", // Do not autofill phone number
-                                division: addr.division || getDivisionByDistrict(addr.district) || "",
-                                district: addr.district || "",
-                                street: addrStreet,
+                                district: addr.district || "Dhaka",
+                                thana: addr.thana || "",
+                                addressLine: addrLine,
                               });
                             }
                           }}
@@ -338,13 +322,13 @@ export default function CartPage() {
                             <span className="text-xs font-bold uppercase tracking-widest">{addr.label || addr.type || 'Address'}</span>
                             {isSelected && <CheckCircle2 size={14} className="ml-auto text-black" />}
                           </div>
-                          <p className="text-xs text-gray-600 line-clamp-2 mt-2">{addrStreet}, {addr.district}</p>
+                          <p className="text-xs text-gray-600 line-clamp-2 mt-2">{addrLine}, {addr.thana}, {addr.district}</p>
                         </div>
                       );
                     })}
                     <div 
-                      onClick={() => setShippingAddress({ name: "", phone: "", division: "", district: "", street: "" })}
-                      className={`p-3 rounded-xl border-2 border-dashed cursor-pointer transition-all flex flex-col items-center justify-center min-h-[80px] ${!shippingAddress.street ? 'border-black bg-gray-50 text-black' : 'border-gray-300 text-gray-500 hover:border-gray-400 hover:text-black'}`}
+                      onClick={() => setShippingAddress({ name: "", phone: "", district: "Dhaka", thana: "", addressLine: "" })}
+                      className={`p-3 rounded-xl border-2 border-dashed cursor-pointer transition-all flex flex-col items-center justify-center min-h-[80px] ${!shippingAddress.addressLine ? 'border-black bg-gray-50 text-black' : 'border-gray-300 text-gray-500 hover:border-gray-400 hover:text-black'}`}
                     >
                       <Plus size={20} className="mb-1" />
                       <span className="text-xs font-bold uppercase tracking-widest">New Address</span>
@@ -376,28 +360,32 @@ export default function CartPage() {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <select 
-                    value={shippingAddress.division}
-                    onChange={(e) => setShippingAddress({...shippingAddress, division: e.target.value, district: ""})}
+                    value={shippingAddress.district}
+                    onChange={(e) => {
+                      const newDistrict = e.target.value;
+                      const defaultThana = bdUpazilas[newDistrict]?.[0] || "";
+                      setShippingAddress({...shippingAddress, district: newDistrict, thana: defaultThana});
+                    }}
                     className="w-full border border-gray-300 rounded-md px-4 py-2.5 text-sm focus:outline-none focus:border-black bg-white"
                   >
-                    <option value="">Select Division *</option>
-                    {Object.keys(bdDistricts).map(div => <option key={div} value={div}>{div}</option>)}
+                    <option value="">Select District *</option>
+                    {bdDistricts.map(dist => <option key={dist} value={dist}>{dist}</option>)}
                   </select>
                   <select 
-                    value={shippingAddress.district}
-                    onChange={(e) => setShippingAddress({...shippingAddress, district: e.target.value})}
-                    disabled={!shippingAddress.division}
+                    value={shippingAddress.thana}
+                    onChange={(e) => setShippingAddress({...shippingAddress, thana: e.target.value})}
+                    disabled={!shippingAddress.district}
                     className="w-full border border-gray-300 rounded-md px-4 py-2.5 text-sm focus:outline-none focus:border-black bg-white disabled:opacity-50"
                   >
-                    <option value="">Select District *</option>
-                    {shippingAddress.division && bdDistricts[shippingAddress.division].map(dist => <option key={dist} value={dist}>{dist}</option>)}
+                    <option value="">Select Upazilla / Thana *</option>
+                    {shippingAddress.district && bdUpazilas[shippingAddress.district]?.map(thana => <option key={thana} value={thana}>{thana}</option>)}
                   </select>
                 </div>
 
                 <textarea 
                   placeholder="ex: House no. / building / street / area *"
-                  value={shippingAddress.street}
-                  onChange={(e) => setShippingAddress({...shippingAddress, street: e.target.value})}
+                  value={shippingAddress.addressLine}
+                  onChange={(e) => setShippingAddress({...shippingAddress, addressLine: e.target.value})}
                   className="w-full border border-gray-300 rounded-md px-4 py-3 text-sm focus:outline-none focus:border-black resize-none min-h-[80px]"
                 ></textarea>
 
@@ -440,21 +428,21 @@ export default function CartPage() {
                       <h3 className="text-sm font-bold mb-3 text-gray-800">Saved Addresses</h3>
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
                         {user.addresses.map((addr: any, idx: number) => {
-                          const addrStreet = addr.street || addr.addressLine || "";
-                          const isSelected = billingAddress.street === addrStreet && billingAddress.district === addr.district;
+                          const addrLine = addr.addressLine || addr.street || "";
+                          const isSelected = billingAddress.addressLine === addrLine && billingAddress.district === addr.district && billingAddress.thana === addr.thana;
                           return (
                             <div 
                               key={idx}
                               onClick={() => {
                                 if (isSelected) {
-                                  setBillingAddress({ name: "", phone: "", division: "", district: "", street: "" });
+                                  setBillingAddress({ name: "", phone: "", district: "Dhaka", thana: "", addressLine: "" });
                                 } else {
                                   setBillingAddress({
                                     name: addr.name || user.name || "",
                                     phone: "", // Do not autofill phone number
-                                    division: addr.division || getDivisionByDistrict(addr.district) || "",
-                                    district: addr.district || "",
-                                    street: addrStreet,
+                                    district: addr.district || "Dhaka",
+                                    thana: addr.thana || "",
+                                    addressLine: addrLine,
                                   });
                                 }
                               }}
@@ -465,13 +453,13 @@ export default function CartPage() {
                                 <span className="text-xs font-bold uppercase tracking-widest">{addr.label || addr.type || 'Address'}</span>
                                 {isSelected && <CheckCircle2 size={14} className="ml-auto text-black" />}
                               </div>
-                              <p className="text-xs text-gray-600 line-clamp-2 mt-2">{addrStreet}, {addr.district}</p>
+                              <p className="text-xs text-gray-600 line-clamp-2 mt-2">{addrLine}, {addr.thana}, {addr.district}</p>
                             </div>
                           );
                         })}
                         <div 
-                          onClick={() => setBillingAddress({ name: "", phone: "", division: "", district: "", street: "" })}
-                          className={`p-3 rounded-xl border-2 border-dashed cursor-pointer transition-all flex flex-col items-center justify-center min-h-[80px] ${!billingAddress.street ? 'border-black bg-gray-50 text-black' : 'border-gray-300 text-gray-500 hover:border-gray-400 hover:text-black'}`}
+                          onClick={() => setBillingAddress({ name: "", phone: "", district: "Dhaka", thana: "", addressLine: "" })}
+                          className={`p-3 rounded-xl border-2 border-dashed cursor-pointer transition-all flex flex-col items-center justify-center min-h-[80px] ${!billingAddress.addressLine ? 'border-black bg-gray-50 text-black' : 'border-gray-300 text-gray-500 hover:border-gray-400 hover:text-black'}`}
                         >
                           <Plus size={20} className="mb-1" />
                           <span className="text-xs font-bold uppercase tracking-widest">New Address</span>
@@ -502,28 +490,32 @@ export default function CartPage() {
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <select 
-                      value={billingAddress.division}
-                      onChange={(e) => setBillingAddress({...billingAddress, division: e.target.value, district: ""})}
+                      value={billingAddress.district}
+                      onChange={(e) => {
+                        const newDistrict = e.target.value;
+                        const defaultThana = bdUpazilas[newDistrict]?.[0] || "";
+                        setBillingAddress({...billingAddress, district: newDistrict, thana: defaultThana});
+                      }}
                       className="w-full border border-gray-300 rounded-md px-4 py-2.5 text-sm focus:outline-none focus:border-black bg-white"
                     >
-                      <option value="">Select Division *</option>
-                      {Object.keys(bdDistricts).map(div => <option key={div} value={div}>{div}</option>)}
+                      <option value="">Select District *</option>
+                      {bdDistricts.map(dist => <option key={dist} value={dist}>{dist}</option>)}
                     </select>
                     <select 
-                      value={billingAddress.district}
-                      onChange={(e) => setBillingAddress({...billingAddress, district: e.target.value})}
-                      disabled={!billingAddress.division}
+                      value={billingAddress.thana}
+                      onChange={(e) => setBillingAddress({...billingAddress, thana: e.target.value})}
+                      disabled={!billingAddress.district}
                       className="w-full border border-gray-300 rounded-md px-4 py-2.5 text-sm focus:outline-none focus:border-black bg-white disabled:opacity-50"
                     >
-                      <option value="">Select District *</option>
-                      {billingAddress.division && bdDistricts[billingAddress.division].map(dist => <option key={dist} value={dist}>{dist}</option>)}
+                      <option value="">Select Upazilla / Thana *</option>
+                      {billingAddress.district && bdUpazilas[billingAddress.district]?.map(thana => <option key={thana} value={thana}>{thana}</option>)}
                     </select>
                   </div>
 
                   <textarea 
                     placeholder="ex: House no. / building / street / area *"
-                    value={billingAddress.street}
-                    onChange={(e) => setBillingAddress({...billingAddress, street: e.target.value})}
+                    value={billingAddress.addressLine}
+                    onChange={(e) => setBillingAddress({...billingAddress, addressLine: e.target.value})}
                     className="w-full border border-gray-300 rounded-md px-4 py-3 text-sm focus:outline-none focus:border-black resize-none min-h-[80px]"
                   ></textarea>
                 </div>
@@ -534,6 +526,30 @@ export default function CartPage() {
           {/* RIGHT COLUMN */}
           <div className="w-full lg:w-[400px] space-y-6">
             
+            {/* Delivery Zone */}
+            <section className="bg-white rounded-xl p-6 border border-gray-200 shadow-sm">
+              <div className="flex items-center gap-2 mb-4">
+                <div className="w-1 h-4 bg-black rounded-full"></div>
+                <h2 className="text-base font-bold">Delivery Zone</h2>
+              </div>
+
+              <div className="space-y-3">
+                {(["Inside Dhaka", "Outside Dhaka"] as const).map((zone) => (
+                  <label key={zone} onClick={() => setDeliveryZone(zone)} className={`flex items-center justify-between p-3 border rounded-md cursor-pointer transition-colors ${deliveryZone === zone ? 'border-black bg-gray-50' : 'border-gray-200'}`}>
+                    <div className="flex items-center gap-3">
+                      <div className={`w-8 h-8 flex items-center justify-center rounded font-bold text-xl bg-blue-50 text-blue-600`}>
+                        📍
+                      </div>
+                      <span className="text-sm font-medium">{zone} {zone === "Inside Dhaka" ? "(৳60)" : "(৳120)"}</span>
+                    </div>
+                    <div className={`w-5 h-5 rounded-full border flex items-center justify-center ${deliveryZone === zone ? 'border-black bg-black text-white' : 'border-gray-300'}`}>
+                      {deliveryZone === zone && <CheckCircle2 size={14} />}
+                    </div>
+                  </label>
+                ))}
+              </div>
+            </section>
+
             {/* Payment Method */}
             <section className="bg-white rounded-xl p-6 border border-gray-200 shadow-sm">
               <div className="flex items-center gap-2 mb-4">
@@ -640,7 +656,7 @@ export default function CartPage() {
                 )}
                 <div className="flex justify-between items-center text-sm">
                   <span className="text-gray-600">Delivery cost</span>
-                  <span className="font-medium text-gray-800">{shippingCost === 0 ? "৳0.00" : `৳${shippingCost.toFixed(2)}`}</span>
+                  <span className="font-medium text-gray-800">৳{shippingCost.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between items-center pt-3 border-t border-gray-100 mt-3">
                   <span className="font-bold text-gray-800">Total</span>
@@ -670,8 +686,8 @@ export default function CartPage() {
                     onChange={(e) => setTermsAccepted(e.target.checked)}
                     className="mt-1 w-4 h-4 accent-black rounded cursor-pointer shrink-0"
                   />
-                  <span className="text-xs text-gray-600 leading-relaxed">
-                    I have read and agree to the <a href="#" className="text-black hover:underline">Terms and Conditions</a>, <a href="#" className="text-black hover:underline">Privacy Policy</a> & <a href="#" className="text-black hover:underline">Refund and Return Policy</a>.
+                  <span className="text-xs text-gray-600">
+                    I have read and agree to the <Link href="/terms" target="_blank" className="font-bold underline hover:text-black">Terms and Conditions</Link>, <Link href="/privacy" target="_blank" className="font-bold underline hover:text-black">Privacy Policy</Link> & <Link href="/shipping-returns" target="_blank" className="font-bold underline hover:text-black">Refund and Return Policy</Link>.
                   </span>
                 </label>
               </div>
