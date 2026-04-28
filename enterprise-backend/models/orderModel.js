@@ -47,6 +47,7 @@ const orderSchema = new mongoose.Schema(
     },
 
     orderNote: { type: String },
+    transactionId: { type: String },
 
     trackingHistory: [
       {

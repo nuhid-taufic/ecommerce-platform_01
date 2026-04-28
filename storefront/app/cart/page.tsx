@@ -41,7 +41,8 @@ export default function CartPage() {
   const [isClient, setIsClient] = useState(false);
   const [isCheckoutLoading, setIsCheckoutLoading] = useState(false);
   const { user, updateUser } = useAuthStore();
-  const [paymentMethod, setPaymentMethod] = useState<"COD" | "SSL" | "BKASH">("COD");
+  const [paymentMethod, setPaymentMethod] = useState<"Cash on Delivery" | "Bkash" | "Nagad" | "Rocket">("Cash on Delivery");
+  const [transactionId, setTransactionId] = useState("");
   const [orderNote, setOrderNote] = useState("");
 
   const [shippingAddress, setShippingAddress] = useState({
@@ -166,6 +167,11 @@ export default function CartPage() {
       return;
     }
 
+    if (["Bkash", "Nagad", "Rocket"].includes(paymentMethod) && !transactionId.trim()) {
+      toast.error(`Please provide the transaction ID for ${paymentMethod} payment.`);
+      return;
+    }
+
     setIsCheckoutLoading(true);
     const loadingToast = toast.loading("Processing Order...");
     
@@ -203,10 +209,11 @@ export default function CartPage() {
             customerEmail: user.email,
             shippingInfo: finalShippingInfo,
             allAddresses: [], // No longer sending all saved addresses to keep it clean
-            paymentMethod: paymentMethod === "BKASH" ? "SSL" : paymentMethod, // Assuming Bkash goes through SSL
+            paymentMethod: paymentMethod, 
             totalAmount: finalTotal,
             orderNote,
             couponCode: appliedCoupon?.code,
+            transactionId: ["Bkash", "Nagad", "Rocket"].includes(paymentMethod) ? transactionId : undefined,
           }),
         },
       );
@@ -508,33 +515,40 @@ export default function CartPage() {
               </div>
 
               <div className="space-y-3">
-                <label className={`flex items-center justify-between p-3 border rounded-md cursor-pointer transition-colors ${paymentMethod === 'COD' ? 'border-black bg-gray-50' : 'border-gray-200'}`}>
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 flex items-center justify-center bg-blue-50 rounded text-xl">
-                      💵
+                {(["Cash on Delivery", "Bkash", "Nagad", "Rocket"] as const).map((method) => (
+                  <label key={method} onClick={() => setPaymentMethod(method)} className={`flex items-center justify-between p-3 border rounded-md cursor-pointer transition-colors ${paymentMethod === method ? 'border-black bg-gray-50' : 'border-gray-200'}`}>
+                    <div className="flex items-center gap-3">
+                      <div className={`w-8 h-8 flex items-center justify-center rounded font-bold overflow-hidden text-[10px] leading-tight ${method === 'Cash on Delivery' ? 'bg-blue-50 text-xl' : method === 'Bkash' ? 'bg-pink-50 text-pink-600' : method === 'Nagad' ? 'bg-orange-50 text-orange-600' : 'bg-purple-50 text-purple-600'}`}>
+                        {method === 'Cash on Delivery' ? '💵' : method}
+                      </div>
+                      <span className="text-sm font-medium">{method}</span>
                     </div>
-                    <span className="text-sm font-medium">Cash On Delivery</span>
-                  </div>
-                  <div className={`w-5 h-5 rounded-full border flex items-center justify-center ${paymentMethod === 'COD' ? 'border-black bg-black text-white' : 'border-gray-300'}`}>
-                    {paymentMethod === 'COD' && <CheckCircle2 size={14} />}
-                  </div>
-                </label>
-
-
-
-                <label className={`flex items-center justify-between p-3 border rounded-md cursor-pointer transition-colors ${paymentMethod === 'BKASH' ? 'border-black bg-gray-50' : 'border-gray-200'}`}>
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 flex items-center justify-center bg-pink-50 rounded text-pink-600 font-bold overflow-hidden">
-                      {/* Placeholder for Bkash logo */}
-                      <span className="text-[10px] leading-tight">bKash</span>
+                    <div className={`w-5 h-5 rounded-full border flex items-center justify-center ${paymentMethod === method ? 'border-black bg-black text-white' : 'border-gray-300'}`}>
+                      {paymentMethod === method && <CheckCircle2 size={14} />}
                     </div>
-                    <span className="text-sm font-medium">Bkash</span>
-                  </div>
-                  <div className={`w-5 h-5 rounded-full border flex items-center justify-center ${paymentMethod === 'BKASH' ? 'border-black bg-black text-white' : 'border-gray-300'}`}>
-                    {paymentMethod === 'BKASH' && <CheckCircle2 size={14} />}
-                  </div>
-                </label>
+                  </label>
+                ))}
               </div>
+
+              {["Bkash", "Nagad", "Rocket"].includes(paymentMethod) && (
+                <div className="mt-4 p-4 bg-gray-50 border border-gray-200 rounded-md">
+                  <p className="text-sm text-gray-700 mb-3 leading-relaxed">
+                    Please send the total amount to our <strong>{paymentMethod}</strong> number: <br/>
+                    <span className="text-xl font-bold text-black block mt-1">01977622623</span>
+                    <span className="text-xs text-gray-500 mt-1 block">Account Type: Personal</span>
+                  </p>
+                  <div className="mt-3">
+                    <label className="block text-xs font-bold text-gray-700 mb-1 uppercase tracking-wider">Transaction ID *</label>
+                    <input 
+                      type="text" 
+                      placeholder="e.g. 8N7A6B5C"
+                      value={transactionId}
+                      onChange={(e) => setTransactionId(e.target.value)}
+                      className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:border-black bg-white"
+                    />
+                  </div>
+                </div>
+              )}
             </section>
 
             {/* Coupon & Summary Wrapper */}
