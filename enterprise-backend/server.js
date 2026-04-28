@@ -23,6 +23,7 @@ const stripeRoutes = require("./routes/paymentRoutes");
 const productRoutes = require("./routes/productRoutes");
 const authRoutes = require("./routes/authRoutes");
 const customerRoutes = require("./routes/customerRoutes");
+const categoryRoutes = require("./routes/categoryRoutes");
 
 require("./config/passport");
 
@@ -61,6 +62,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/orders", orderRoutes);
 app.use("/api/stats", statsRoutes);
 app.use("/api/customers", customerRoutes);
+app.use("/api/categories", categoryRoutes);
 app.use("/api/analytics", analyticsRoutes);
 app.use("/api/coupons", couponRoutes);
 app.use("/api/reviews", reviewRoutes);

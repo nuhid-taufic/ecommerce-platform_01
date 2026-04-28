@@ -7,6 +7,10 @@ const productSchema = new mongoose.Schema(
       required: [true, "Product name is required"],
       trim: true,
     },
+    productId: {
+      type: String,
+      unique: true,
+    },
     description: {
       type: String,
       required: [true, "Product description is required"],
@@ -42,7 +46,7 @@ const productSchema = new mongoose.Schema(
     },
     currency: {
       type: String,
-      default: "USD",
+      default: "BDT",
     },
     embedding: {
       type: [Number],

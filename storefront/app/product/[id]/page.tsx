@@ -217,22 +217,6 @@ export default function ProductDetailsPage() {
 
   return (
     <div className="min-h-screen bg-[#FAFAFA] font-sans text-[#111111] selection:bg-black selection:text-white pb-32">
-      {/* Floating Cart Widget */}
-      {items && items.length > 0 && (
-        <Link
-          href="/cart"
-          className="fixed bottom-8 right-8 z-[100] group flex flex-col items-center animate-in fade-in slide-in-from-bottom-10 duration-500"
-        >
-          <div className="bg-black text-white px-8 py-4 rounded-t-3xl flex flex-col items-center gap-1 shadow-2xl group-hover:bg-[#1a1a1a] transition-all min-w-[140px]">
-            <ShoppingBag className="w-6 h-6 mb-1" />
-            <span className="text-sm font-black uppercase tracking-widest">{items.length} Items</span>
-          </div>
-          <div className="bg-white text-black px-8 py-4 rounded-b-3xl border-x border-b border-gray-100 shadow-2xl font-black text-xl min-w-[140px] text-center">
-             ৳{totalPrice?.toFixed(2) || "0.00"}
-          </div>
-          <div className="absolute inset-0 rounded-[2rem] bg-black/5 scale-110 blur-2xl -z-10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-        </Link>
-      )}
 
       <div className="max-w-7xl mx-auto px-6 lg:px-8 py-4">
         <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-gray-400">
@@ -320,6 +304,10 @@ export default function ProductDetailsPage() {
                 <Star key={s} className={`w-4 h-4 ${s <= Math.round(Number(averageRating)) ? "fill-current" : "text-gray-200"}`} />
               ))}
               <span className="text-gray-400 text-xs ml-2 uppercase font-bold tracking-widest">({totalReviews} Reviews)</span>
+              <span className="mx-3 text-gray-200">|</span>
+              <span className="text-gray-400 text-[10px] uppercase font-black tracking-widest">{product.totalSold || 0} SOLD</span>
+              <span className="mx-3 text-gray-200">|</span>
+              <span className="text-gray-300 text-[10px] font-mono tracking-widest">#{product.productId || 'N/A'}</span>
             </div>
           </div>
 
@@ -428,39 +416,22 @@ export default function ProductDetailsPage() {
           </div>
 
           {activeAccordion === "details" ? (
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 animate-in fade-in slide-in-from-bottom-4 duration-500">
-               <div>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-16 animate-in fade-in slide-in-from-bottom-4 duration-500">
+               <div className="lg:col-span-2">
                   <h3 className="text-xl font-bold mb-6">Overview</h3>
                   <p className="text-gray-500 font-light leading-relaxed mb-8">
                     {product.description}
                   </p>
-                  <div className="bg-gray-50 p-6 rounded-2xl border border-gray-100">
-                     <h4 className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-4 flex items-center gap-2">
-                        <ShieldCheck className="w-4 h-4 text-green-500" /> Quality Guarantee
+               </div>
+               <div className="lg:col-span-1">
+                  <div className="bg-white p-8 rounded-[2rem] border border-gray-100 shadow-sm shadow-black/[0.02]">
+                     <h4 className="text-xs font-black uppercase tracking-[0.2em] text-gray-400 mb-6 flex items-center gap-2">
+                        <ShieldCheck className="w-5 h-5 text-emerald-500" /> Quality Guarantee
                      </h4>
-                     <p className="text-sm text-gray-600 leading-relaxed">
+                     <p className="text-sm text-gray-600 leading-relaxed font-light">
                         Every product is sourced from verified suppliers and undergoes strict quality checks before shipping. We ensure 100% authenticity and freshness for all our items.
                      </p>
                   </div>
-               </div>
-               <div>
-                  <h3 className="text-xl font-bold mb-6">Key Benefits</h3>
-                  <ul className="space-y-4">
-                    {(product.benefits?.length > 0 ? product.benefits : [
-                      "Premium quality sourced from origin",
-                      "100% Natural and organic processing",
-                      "No artificial colors or preservatives",
-                      "Air-tight packaging for lasting freshness",
-                      "Lab tested for purity and nutrition"
-                    ]).map((benefit: string, bidx: number) => (
-                      <li key={bidx} className="flex items-start gap-3 text-gray-500 font-light">
-                        <div className="w-5 h-5 rounded-full bg-orange-50 flex items-center justify-center shrink-0 mt-0.5">
-                           <span className="text-[10px] font-bold text-[#FF8A00]">{bidx + 1}</span>
-                        </div>
-                        {benefit}
-                      </li>
-                    ))}
-                  </ul>
                </div>
             </div>
           ) : (

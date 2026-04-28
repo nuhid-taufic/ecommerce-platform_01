@@ -96,7 +96,28 @@ export default function HomePage() {
         const settingsData = await settingsRes.json();
 
         if (settingsRes.ok && settingsData.success) {
-          setBentoBoxData(settingsData.settings?.bentoBox || []);
+          const bentoData = settingsData.settings?.bentoBox || [];
+          
+          // Fetch featured categories
+          const catRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/categories`);
+          const catData = await catRes.json();
+          
+          if (catRes.ok && catData.success) {
+            const featuredCats = catData.categories.filter((c: any) => c.isFeaturedOnHome);
+            if (featuredCats.length > 0) {
+              // Convert Category models to BentoBox format
+              const syncedBento = featuredCats.map((c: any) => ({
+                title: c.name,
+                imageUrls: [c.image],
+                linkTo: `/shop?category=${c.name}`
+              }));
+              setBentoBoxData(syncedBento);
+            } else {
+              setBentoBoxData(bentoData);
+            }
+          } else {
+            setBentoBoxData(bentoData);
+          }
         }
       } catch (error) {
         console.error("Failed to load data", error);
