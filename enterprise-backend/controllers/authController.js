@@ -234,7 +234,7 @@ const resetPassword = async (req, res) => {
 
 const saveAddress = async (req, res) => {
   try {
-    const { email, address } = req.body;
+    const { email, address, index } = req.body;
     if (!email || !address) {
       return res
         .status(400)
@@ -249,14 +249,20 @@ const saveAddress = async (req, res) => {
     }
 
     user.addresses = user.addresses || [];
-    user.addresses.push(address);
+    
+    if (index !== undefined && index >= 0 && index < user.addresses.length) {
+      user.addresses[index] = address;
+    } else {
+      user.addresses.push(address);
+    }
+    
     await user.save();
 
     res
       .status(200)
       .json({
         success: true,
-        message: "Address saved successfully",
+        message: index !== undefined ? "Address updated successfully" : "Address saved successfully",
         addresses: user.addresses,
       });
   } catch (error) {
