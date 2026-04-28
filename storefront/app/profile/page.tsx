@@ -118,7 +118,7 @@ export default function ProfilePage() {
                   >
                     <div className="flex items-center gap-3.5">
                       <span className={activeTab === menu.id ? "text-white" : "text-gray-400 group-hover:text-black transition-colors"}>
-                        {React.cloneElement(menu.icon as React.ReactElement, { size: 20, strokeWidth: 2 })}
+                        {React.cloneElement(menu.icon as React.ReactElement<any>, { size: 20, strokeWidth: 2 })}
                       </span>
                       {menu.label}
                     </div>
@@ -464,6 +464,7 @@ const AddressManage = ({ user, updateUser }: { user: any; updateUser: any }) => 
   });
   const [loading, setLoading] = useState(false);
   const [deletingIndex, setDeletingIndex] = useState<number | null>(null);
+  const [editingIndex, setEditingIndex] = useState<number | null>(null);
 
   useEffect(() => {
     if (user?.addresses) setAddresses(user.addresses);
@@ -479,20 +480,21 @@ const AddressManage = ({ user, updateUser }: { user: any; updateUser: any }) => 
   }, [formData.district]);
 
   const handleSave = async () => {
-    if (!formData.addressLine || !formData.thana || !formData.postalCode) return toast.error("Please fill all fields");
+    if (!formData.addressLine || !formData.thana) return toast.error("Please fill all required fields");
     setLoading(true);
     try {
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/address`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: user.email, address: formData }),
+        body: JSON.stringify({ email: user.email, address: formData, index: editingIndex !== null ? editingIndex : undefined }),
       });
       const data = await res.json();
       if (data.success) {
-        toast.success("Address saved permanently!");
+        toast.success(editingIndex !== null ? "Address updated!" : "Address saved permanently!");
         setAddresses(data.addresses);
         updateUser({ ...user, addresses: data.addresses });
         setIsOpen(false);
+        setEditingIndex(null);
       } else {
         toast.error("Failed to save address");
       }
@@ -538,7 +540,17 @@ const AddressManage = ({ user, updateUser }: { user: any; updateUser: any }) => 
           <p className="text-sm text-gray-500 mt-1">Manage your saved shipping locations</p>
         </div>
         <button
-          onClick={() => setIsOpen(true)}
+          onClick={() => {
+            setFormData({
+              type: "Home",
+              addressLine: "",
+              district: "Dhaka",
+              thana: "",
+              postalCode: "",
+            });
+            setEditingIndex(null);
+            setIsOpen(true);
+          }}
           className="flex items-center gap-3 text-sm font-bold uppercase tracking-widest bg-black text-white px-8 py-4 rounded-2xl hover:bg-gray-800 transition-all shadow-lg shadow-black/5"
         >
           <Plus size={18} /> Add New Address
@@ -563,17 +575,35 @@ const AddressManage = ({ user, updateUser }: { user: any; updateUser: any }) => 
                     {addr.type}
                   </span>
                 </div>
-                <button
-                  onClick={() => handleDelete(idx)}
-                  disabled={deletingIndex === idx}
-                  className={`p-3 rounded-xl transition-all ${
-                    deletingIndex === idx
-                      ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-                      : "text-gray-400 hover:text-red-500 hover:bg-red-50"
-                  }`}
-                >
-                  <Trash2 size={20} />
-                </button>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => {
+                      setFormData({
+                        type: addr.type || "Home",
+                        addressLine: addr.addressLine || "",
+                        district: addr.district || "Dhaka",
+                        thana: addr.thana || "",
+                        postalCode: addr.postalCode || "",
+                      });
+                      setEditingIndex(idx);
+                      setIsOpen(true);
+                    }}
+                    className="p-3 rounded-xl transition-all text-gray-400 hover:text-blue-500 hover:bg-blue-50"
+                  >
+                    <Edit2 size={20} />
+                  </button>
+                  <button
+                    onClick={() => handleDelete(idx)}
+                    disabled={deletingIndex === idx}
+                    className={`p-3 rounded-xl transition-all ${
+                      deletingIndex === idx
+                        ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                        : "text-gray-400 hover:text-red-500 hover:bg-red-50"
+                    }`}
+                  >
+                    <Trash2 size={20} />
+                  </button>
+                </div>
               </div>
               <p className="text-base font-bold mb-2 line-clamp-2 leading-relaxed">{addr.addressLine}</p>
               <p className="text-sm text-gray-400 font-semibold uppercase tracking-wider">
@@ -591,7 +621,7 @@ const AddressManage = ({ user, updateUser }: { user: any; updateUser: any }) => 
               <X size={24} />
             </button>
             <div className="mb-10 text-center">
-              <h3 className="text-3xl font-bold tracking-tight">New Address</h3>
+              <h3 className="text-3xl font-bold tracking-tight">{editingIndex !== null ? "Edit Address" : "New Address"}</h3>
               <p className="text-sm text-gray-500 mt-2">Where should we deliver your orders?</p>
             </div>
             
@@ -621,7 +651,7 @@ const AddressManage = ({ user, updateUser }: { user: any; updateUser: any }) => 
                 />
               </div>
               <div>
-                <label className="text-xs font-bold uppercase tracking-widest text-gray-400 block mb-3">Postal Code</label>
+                <label className="text-xs font-bold uppercase tracking-widest text-gray-400 block mb-3">Postal Code (Optional)</label>
                 <input
                   type="text"
                   value={formData.postalCode}
