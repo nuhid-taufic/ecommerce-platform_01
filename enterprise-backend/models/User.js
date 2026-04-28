@@ -12,6 +12,7 @@ const userSchema = new mongoose.Schema(
     avatar: { type: String },
 
     addresses: { type: Array, default: [] },
+    savedCoupons: { type: [String], default: [] },
 
     role: { type: String, default: "customer" },
   },
