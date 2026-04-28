@@ -30,12 +30,14 @@ const bdDistricts: { [key: string]: string[] } = {
 
 export default function CartPage() {
   const {
-    cartItems,
+    items,
     removeFromCart,
     increaseQuantity,
     decreaseQuantity,
     clearCart,
   } = useCartStore();
+
+  const cartItems = items || [];
   const [isClient, setIsClient] = useState(false);
   const [isCheckoutLoading, setIsCheckoutLoading] = useState(false);
   const { user, updateUser } = useAuthStore();
