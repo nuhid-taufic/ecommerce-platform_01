@@ -18,6 +18,7 @@ const generateOrderNumber = () => {
 };
 
 exports.createOrder = async (req, res) => {
+  console.log("createOrder started");
   try {
     const {
       cartItems,
@@ -32,21 +33,27 @@ exports.createOrder = async (req, res) => {
     const tran_id = "ORD_" + new Date().getTime();
     const orderNumber = generateOrderNumber();
 
+    console.log("finding customer");
     const customer = await Customer.findOne({ email: customerEmail });
+    console.log("customer found", customer ? "yes" : "no");
     let customerId = null;
 
     if (customer) {
       customerId = customer._id;
 
       if (allAddresses && allAddresses.length > 0) {
+        console.log("saving customer addresses");
         customer.addresses = allAddresses;
         await customer.save();
+        console.log("customer saved");
       }
     }
 
     const orderItems = [];
     for (let item of cartItems) {
+      console.log("finding product", item._id);
       const productDoc = await Product.findById(item._id);
+      console.log("product found", productDoc ? "yes" : "no");
       if (!productDoc) {
         return res
           .status(400)
@@ -85,14 +92,19 @@ exports.createOrder = async (req, res) => {
         orderNumber: orderNumber,
         transactionId: transactionId,
       });
+      console.log("saving newOrder");
       await newOrder.save();
+      console.log("newOrder saved");
 
       for (let item of cartItems) {
+        console.log("updating product stock", item._id);
         await Product.findByIdAndUpdate(item._id, {
           $inc: { stock: -item.quantity },
         });
+        console.log("product stock updated");
       }
 
+      console.log("returning response for COD/Mobile");
       return res
         .status(200)
         .json({

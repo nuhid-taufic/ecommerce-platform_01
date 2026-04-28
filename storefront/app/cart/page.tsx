@@ -28,6 +28,17 @@ const bdDistricts: { [key: string]: string[] } = {
   Mymensingh: ["Mymensingh", "Netrokona", "Jamalpur", "Sherpur"],
 };
 
+const getDivisionByDistrict = (districtName: string) => {
+  if (!districtName) return "";
+  for (const [division, districts] of Object.entries(bdDistricts)) {
+    // Make case-insensitive match just in case
+    if (districts.some(d => d.toLowerCase() === districtName.toLowerCase())) {
+      return division;
+    }
+  }
+  return "";
+};
+
 export default function CartPage() {
   const {
     items,
@@ -76,11 +87,11 @@ export default function CartPage() {
     if (user && user.addresses && user.addresses.length > 0) {
       const defaultAddr = user.addresses[0];
       setShippingAddress({
-        name: defaultAddr.name || "",
-        phone: defaultAddr.phone || "",
-        division: defaultAddr.division || "",
+        name: defaultAddr.name || user.name || "",
+        phone: "", // Do not autofill phone number
+        division: defaultAddr.division || getDivisionByDistrict(defaultAddr.district) || "",
         district: defaultAddr.district || "",
-        street: defaultAddr.street || "",
+        street: defaultAddr.street || defaultAddr.addressLine || "",
       });
     }
   }, [user]);
@@ -222,11 +233,13 @@ export default function CartPage() {
       toast.dismiss(loadingToast);
 
       if (data.success) {
-        if ((paymentMethod === "SSL" || paymentMethod === "BKASH") && data.gatewayUrl) {
+        if (data.gatewayUrl) {
           window.location.href = data.gatewayUrl;
         } else {
           clearCart();
           router.push(`/success?orderId=${data.orderId}`);
+          // Reset loading state in case Next.js takes a while to navigate
+          setTimeout(() => setIsCheckoutLoading(false), 500);
         }
       } else {
         toast.error(data.message || "Failed to process order");
@@ -300,25 +313,32 @@ export default function CartPage() {
                   <h3 className="text-sm font-bold mb-3 text-gray-800">Saved Addresses</h3>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
                     {user.addresses.map((addr: any, idx: number) => {
-                      const isSelected = shippingAddress.street === addr.street && shippingAddress.district === addr.district;
+                      const addrStreet = addr.street || addr.addressLine || "";
+                      const isSelected = shippingAddress.street === addrStreet && shippingAddress.district === addr.district;
                       return (
                         <div 
                           key={idx}
-                          onClick={() => setShippingAddress({
-                            name: addr.name || "",
-                            phone: addr.phone || "",
-                            division: addr.division || "",
-                            district: addr.district || "",
-                            street: addr.street || "",
-                          })}
+                          onClick={() => {
+                            if (isSelected) {
+                              setShippingAddress({ name: "", phone: "", division: "", district: "", street: "" });
+                            } else {
+                              setShippingAddress({
+                                name: addr.name || user.name || "",
+                                phone: "", // Do not autofill phone number
+                                division: addr.division || getDivisionByDistrict(addr.district) || "",
+                                district: addr.district || "",
+                                street: addrStreet,
+                              });
+                            }
+                          }}
                           className={`p-3 rounded-xl border-2 cursor-pointer transition-all ${isSelected ? 'border-black bg-gray-50' : 'border-gray-200 hover:border-gray-300'}`}
                         >
                           <div className="flex items-center gap-2 mb-1">
                             <MapPin size={14} className={isSelected ? 'text-black' : 'text-gray-500'} />
-                            <span className="text-xs font-bold uppercase tracking-widest">{addr.label || 'Address'}</span>
+                            <span className="text-xs font-bold uppercase tracking-widest">{addr.label || addr.type || 'Address'}</span>
                             {isSelected && <CheckCircle2 size={14} className="ml-auto text-black" />}
                           </div>
-                          <p className="text-xs text-gray-600 line-clamp-2 mt-2">{addr.street}, {addr.district}</p>
+                          <p className="text-xs text-gray-600 line-clamp-2 mt-2">{addrStreet}, {addr.district}</p>
                         </div>
                       );
                     })}
@@ -420,25 +440,32 @@ export default function CartPage() {
                       <h3 className="text-sm font-bold mb-3 text-gray-800">Saved Addresses</h3>
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
                         {user.addresses.map((addr: any, idx: number) => {
-                          const isSelected = billingAddress.street === addr.street && billingAddress.district === addr.district;
+                          const addrStreet = addr.street || addr.addressLine || "";
+                          const isSelected = billingAddress.street === addrStreet && billingAddress.district === addr.district;
                           return (
                             <div 
                               key={idx}
-                              onClick={() => setBillingAddress({
-                                name: addr.name || "",
-                                phone: addr.phone || "",
-                                division: addr.division || "",
-                                district: addr.district || "",
-                                street: addr.street || "",
-                              })}
+                              onClick={() => {
+                                if (isSelected) {
+                                  setBillingAddress({ name: "", phone: "", division: "", district: "", street: "" });
+                                } else {
+                                  setBillingAddress({
+                                    name: addr.name || user.name || "",
+                                    phone: "", // Do not autofill phone number
+                                    division: addr.division || getDivisionByDistrict(addr.district) || "",
+                                    district: addr.district || "",
+                                    street: addrStreet,
+                                  });
+                                }
+                              }}
                               className={`p-3 rounded-xl border-2 cursor-pointer transition-all ${isSelected ? 'border-black bg-gray-50' : 'border-gray-200 hover:border-gray-300'}`}
                             >
                               <div className="flex items-center gap-2 mb-1">
                                 <MapPin size={14} className={isSelected ? 'text-black' : 'text-gray-500'} />
-                                <span className="text-xs font-bold uppercase tracking-widest">{addr.label || 'Address'}</span>
+                                <span className="text-xs font-bold uppercase tracking-widest">{addr.label || addr.type || 'Address'}</span>
                                 {isSelected && <CheckCircle2 size={14} className="ml-auto text-black" />}
                               </div>
-                              <p className="text-xs text-gray-600 line-clamp-2 mt-2">{addr.street}, {addr.district}</p>
+                              <p className="text-xs text-gray-600 line-clamp-2 mt-2">{addrStreet}, {addr.district}</p>
                             </div>
                           );
                         })}
