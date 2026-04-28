@@ -27,6 +27,7 @@ exports.createOrder = async (req, res) => {
       paymentMethod,
       totalAmount,
       orderNote,
+      transactionId,
     } = req.body;
     const tran_id = "ORD_" + new Date().getTime();
     const orderNumber = generateOrderNumber();
@@ -69,7 +70,7 @@ exports.createOrder = async (req, res) => {
       });
     }
 
-    if (paymentMethod === "COD") {
+    if (["Cash on Delivery", "Bkash", "Nagad", "Rocket"].includes(paymentMethod)) {
       const newOrder = new Order({
         tran_id: tran_id,
         customer: customerId,
@@ -77,11 +78,12 @@ exports.createOrder = async (req, res) => {
         items: orderItems,
         shippingInfo: shippingInfo,
         totalAmount: totalAmount,
-        paymentMethod: "COD",
+        paymentMethod: paymentMethod,
         paymentStatus: "Pending",
         orderStatus: "Pending",
         orderNote: orderNote,
         orderNumber: orderNumber,
+        transactionId: transactionId,
       });
       await newOrder.save();
 
@@ -95,7 +97,7 @@ exports.createOrder = async (req, res) => {
         .status(200)
         .json({
           success: true,
-          message: "Order placed successfully via COD",
+          message: `Order placed successfully via ${paymentMethod}`,
           orderId: orderNumber,
         });
     } else if (paymentMethod === "SSL") {
