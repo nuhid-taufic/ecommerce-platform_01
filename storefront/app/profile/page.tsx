@@ -340,20 +340,18 @@ const PromoCoupon = () => {
   const [loading, setLoading] = useState(false);
   
   useEffect(() => {
-    fetchCoupons();
-  }, []);
+    if (user) {
+      fetchCoupons();
+    }
+  }, [user]);
 
   const fetchCoupons = async () => {
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/coupons`);
+      if (!user) return;
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/saved-coupons/${user.email}`);
       const data = await res.json();
       if (data.success) {
-        const active = data.coupons.filter((c: any) => 
-          c.isActive && 
-          new Date(c.expiryDate) > new Date() &&
-          c.usedCount < c.usageLimit
-        );
-        setCoupons(active);
+        setCoupons(data.coupons);
       }
     } catch (error) {
       console.error("Failed to fetch coupons");
@@ -362,9 +360,14 @@ const PromoCoupon = () => {
 
   const handleVerify = async () => {
     if (!code) return toast.error("Enter a coupon code");
+    if (!user) return toast.error("Please log in to save coupons");
     setLoading(true);
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/coupons/verify/${code}`);
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/save-coupon`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: user.email, code }),
+      });
       const data = await res.json();
       if (data.success) {
         toast.success("Coupon added to your list!");

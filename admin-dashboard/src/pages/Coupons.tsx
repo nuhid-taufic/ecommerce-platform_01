@@ -17,6 +17,15 @@ export default function Coupons() {
     usageLimit: "100",
   });
 
+  const generateShortCode = () => {
+    const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    let result = "CPN-";
+    for (let i = 0; i < 6; i++) {
+      result += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return result;
+  };
+
   const fetchCoupons = async () => {
     try {
       const res = await fetch(`${import.meta.env.VITE_API_URL}/coupons`);
@@ -100,7 +109,10 @@ export default function Coupons() {
           </p>
         </div>
         <button
-          onClick={() => setIsModalOpen(true)}
+          onClick={() => {
+            setFormData({ ...formData, code: generateShortCode() });
+            setIsModalOpen(true);
+          }}
           className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-5 py-3 rounded-xl font-bold transition-all shadow-md active:scale-95"
         >
           <Plus className="h-5 w-5" /> Create Coupon

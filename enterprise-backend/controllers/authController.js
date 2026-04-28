@@ -1,5 +1,6 @@
 const User = require("../models/User");
 const ResetOtp = require("../models/ResetOtp");
+const Coupon = require("../models/Coupon");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const emailValidator = require("deep-email-validator");
@@ -378,6 +379,65 @@ const deleteAccount = async (req, res) => {
   }
 };
 
+const saveCoupon = async (req, res) => {
+  try {
+    const { email, code } = req.body;
+    if (!email || !code) {
+      return res.status(400).json({ success: false, message: "Email and code are required" });
+    }
+
+    const coupon = await Coupon.findOne({ code: code.toUpperCase() });
+    if (!coupon) {
+      return res.status(404).json({ success: false, message: "Coupon not found" });
+    }
+    if (!coupon.isActive) {
+      return res.status(400).json({ success: false, message: "This coupon is inactive" });
+    }
+    if (new Date(coupon.expiryDate) < new Date()) {
+      return res.status(400).json({ success: false, message: "This coupon has expired" });
+    }
+    if (coupon.usedCount >= coupon.usageLimit) {
+      return res.status(400).json({ success: false, message: "Coupon usage limit reached" });
+    }
+
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ success: false, message: "User not found" });
+    }
+
+    if (user.savedCoupons && user.savedCoupons.includes(coupon.code)) {
+      return res.status(400).json({ success: false, message: "Coupon already saved", coupon });
+    }
+
+    user.savedCoupons = user.savedCoupons || [];
+    user.savedCoupons.push(coupon.code);
+    await user.save();
+
+    res.status(200).json({ success: true, message: "Coupon saved successfully", coupon });
+  } catch (error) {
+    console.error("Save Coupon Error:", error);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+};
+
+const getSavedCoupons = async (req, res) => {
+  try {
+    const { email } = req.params;
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ success: false, message: "User not found" });
+    }
+
+    const savedCodes = user.savedCoupons || [];
+    const coupons = await Coupon.find({ code: { $in: savedCodes } });
+
+    res.status(200).json({ success: true, coupons });
+  } catch (error) {
+    console.error("Get Saved Coupons Error:", error);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+};
+
 module.exports = {
   register,
   login,
@@ -388,4 +448,6 @@ module.exports = {
   deleteAddress,
   updateProfile,
   deleteAccount,
+  saveCoupon,
+  getSavedCoupons,
 };

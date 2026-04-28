@@ -65,6 +65,8 @@ export default function CartPage() {
   const [saveAddress, setSaveAddress] = useState(true);
   const [couponCode, setCouponCode] = useState("");
   const [isCouponOpen, setIsCouponOpen] = useState(false);
+  const [appliedCoupon, setAppliedCoupon] = useState<any>(null);
+  const [isApplyingCoupon, setIsApplyingCoupon] = useState(false);
 
   const router = useRouter();
 
@@ -94,7 +96,51 @@ export default function CartPage() {
     0,
   );
   const shippingCost = totalPrice > 200 ? 0 : 15; // You can adjust this based on your logic
-  const finalTotal = totalPrice + shippingCost;
+
+  let discountAmount = 0;
+  if (appliedCoupon) {
+    if (totalPrice >= (appliedCoupon.minOrderAmount || 0)) {
+      if (appliedCoupon.discountType === "percentage") {
+        discountAmount = totalPrice * (appliedCoupon.discountValue / 100);
+      } else {
+        discountAmount = appliedCoupon.discountValue;
+      }
+    }
+  }
+
+  const finalTotal = Math.max(0, totalPrice - discountAmount + shippingCost);
+
+  const handleApplyCoupon = async () => {
+    if (!couponCode) return toast.error("Please enter a coupon code");
+    setIsApplyingCoupon(true);
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/coupons/verify/${couponCode}`);
+      const data = await res.json();
+      if (data.success) {
+        if (totalPrice < (data.coupon.minOrderAmount || 0)) {
+          toast.error(`Minimum order amount for this coupon is ৳${data.coupon.minOrderAmount}`);
+        } else {
+          toast.success("Coupon applied successfully!");
+          setAppliedCoupon(data.coupon);
+          setIsCouponOpen(false);
+        }
+      } else {
+        toast.error(data.message || "Invalid coupon");
+        setAppliedCoupon(null);
+      }
+    } catch (error) {
+      toast.error("Error verifying coupon");
+      setAppliedCoupon(null);
+    } finally {
+      setIsApplyingCoupon(false);
+    }
+  };
+
+  const handleRemoveCoupon = () => {
+    setAppliedCoupon(null);
+    setCouponCode("");
+    toast.success("Coupon removed");
+  };
 
   const handleCheckout = async () => {
     if (cartItems.length === 0) return;
@@ -160,6 +206,7 @@ export default function CartPage() {
             paymentMethod: paymentMethod === "BKASH" ? "SSL" : paymentMethod, // Assuming Bkash goes through SSL
             totalAmount: finalTotal,
             orderNote,
+            couponCode: appliedCoupon?.code,
           }),
         },
       );
@@ -502,7 +549,7 @@ export default function CartPage() {
                   Have any coupon or gift voucher?
                   {isCouponOpen ? <ChevronUp size={16} className="text-black" /> : <ChevronDown size={16} className="text-black" />}
                 </button>
-                {isCouponOpen && (
+                {isCouponOpen && !appliedCoupon && (
                   <div className="mt-3 flex gap-2">
                     <input 
                       type="text" 
@@ -511,7 +558,29 @@ export default function CartPage() {
                       onChange={(e) => setCouponCode(e.target.value)}
                       className="flex-1 border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:border-black"
                     />
-                    <button className="bg-gray-800 text-white px-4 py-2 rounded-md text-sm hover:bg-black transition">Apply</button>
+                    <button 
+                      onClick={handleApplyCoupon}
+                      disabled={isApplyingCoupon}
+                      className="bg-gray-800 text-white px-4 py-2 rounded-md text-sm hover:bg-black transition disabled:opacity-50"
+                    >
+                      {isApplyingCoupon ? "..." : "Apply"}
+                    </button>
+                  </div>
+                )}
+                {appliedCoupon && (
+                  <div className="mt-3 flex items-center justify-between bg-emerald-50 border border-emerald-100 p-3 rounded-md">
+                    <div>
+                      <p className="text-sm font-bold text-emerald-800 uppercase tracking-widest">{appliedCoupon.code}</p>
+                      <p className="text-xs text-emerald-600 mt-0.5">
+                        {appliedCoupon.discountType === "percentage" ? `${appliedCoupon.discountValue}% OFF` : `৳${appliedCoupon.discountValue} OFF`}
+                      </p>
+                    </div>
+                    <button 
+                      onClick={handleRemoveCoupon}
+                      className="text-red-500 text-xs font-bold uppercase hover:text-red-700 transition"
+                    >
+                      Remove
+                    </button>
                   </div>
                 )}
               </div>
@@ -522,6 +591,12 @@ export default function CartPage() {
                   <span className="text-gray-600">Sub total</span>
                   <span className="font-medium text-gray-800">৳{totalPrice.toFixed(2)}</span>
                 </div>
+                {appliedCoupon && (
+                  <div className="flex justify-between items-center text-sm text-emerald-600">
+                    <span className="font-medium">Discount ({appliedCoupon.code})</span>
+                    <span className="font-medium">-৳{discountAmount.toFixed(2)}</span>
+                  </div>
+                )}
                 <div className="flex justify-between items-center text-sm">
                   <span className="text-gray-600">Delivery cost</span>
                   <span className="font-medium text-gray-800">{shippingCost === 0 ? "৳0.00" : `৳${shippingCost.toFixed(2)}`}</span>

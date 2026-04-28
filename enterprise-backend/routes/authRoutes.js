@@ -11,6 +11,8 @@ const {
   deleteAddress,
   updateProfile,
   deleteAccount,
+  saveCoupon,
+  getSavedCoupons,
 } = require("../controllers/authController");
 
 router.post("/register", register);
@@ -24,6 +26,9 @@ router.post("/address", saveAddress);
 router.post("/delete-address", deleteAddress);
 router.put("/update-profile", updateProfile);
 router.delete("/delete-account", deleteAccount);
+
+router.post("/save-coupon", saveCoupon);
+router.get("/saved-coupons/:email", getSavedCoupons);
 
 router.get("/google", (req, res, next) => {
   const action = req.query.action || "login";
