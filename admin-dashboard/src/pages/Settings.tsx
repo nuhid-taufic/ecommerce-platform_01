@@ -13,25 +13,59 @@ import {
   ImagePlus,
   LayoutTemplate,
   UploadCloud,
+  ShieldAlert,
+  Megaphone,
+  Search,
+  MapPin,
+  FileText,
+  DollarSign,
+  Percent,
 } from "lucide-react";
 import toast from "react-hot-toast";
+import { useSettings } from "../context/SettingsProvider";
 
 export default function Settings() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [activeTab, setActiveTab] = useState("general");
 
   const [formData, setFormData] = useState({
+    // General
     storeName: "",
     browserTitle: "",
     contactEmail: "",
     contactPhone: "",
-    shippingInsideCity: 60,
-    shippingOutsideCity: 120,
+    storeAddress: "",
+    
+    // Brand
     logoUrl: "",
     faviconUrl: "",
     colors: { primary: "#2563eb", secondary: "#475569", optional: "#f59e0b" },
+    
+    // Config
+    isMaintenanceMode: false,
+    currencySymbol: "৳",
+    currencyCode: "BDT",
+    taxRate: 0,
+    shippingInsideCity: 60,
+    shippingOutsideCity: 120,
+
+    // Marketing & SEO
+    showAnnouncement: false,
+    announcementText: "",
+    announcementLink: "",
+    seoDescription: "",
+    seoKeywords: "",
+    
+    // Social & Legal
     socialLinks: { facebook: "", instagram: "" },
+    footerText: "",
+    refundPolicyUrl: "",
+    privacyPolicyUrl: "",
+    termsUrl: "",
   });
+
+  const { setSettings } = useSettings();
 
   useEffect(() => {
     const fetchSettings = async () => {
@@ -40,24 +74,43 @@ export default function Settings() {
         const data = await res.json();
 
         if (res.ok && data.success && data.settings) {
+          const s = data.settings;
           setFormData({
-            storeName: data.settings.storeName || "",
-            browserTitle: data.settings.browserTitle || "",
-            contactEmail: data.settings.contactEmail || "",
-            contactPhone: data.settings.contactPhone || "",
-            shippingInsideCity: data.settings.shippingInsideCity || 60,
-            shippingOutsideCity: data.settings.shippingOutsideCity || 120,
-            logoUrl: data.settings.logoUrl || "",
-            faviconUrl: data.settings.faviconUrl || "",
+            storeName: s.storeName || "",
+            browserTitle: s.browserTitle || "",
+            contactEmail: s.contactEmail || "",
+            contactPhone: s.contactPhone || "",
+            storeAddress: s.storeAddress || "",
+            
+            logoUrl: s.logoUrl || "",
+            faviconUrl: s.faviconUrl || "",
             colors: {
-              primary: data.settings.colors?.primary || "#2563eb",
-              secondary: data.settings.colors?.secondary || "#475569",
-              optional: data.settings.colors?.optional || "#f59e0b",
+              primary: s.colors?.primary || "#2563eb",
+              secondary: s.colors?.secondary || "#475569",
+              optional: s.colors?.optional || "#f59e0b",
             },
+            
+            isMaintenanceMode: s.isMaintenanceMode || false,
+            currencySymbol: s.currencySymbol || "৳",
+            currencyCode: s.currencyCode || "BDT",
+            taxRate: s.taxRate || 0,
+            shippingInsideCity: s.shippingInsideCity || 60,
+            shippingOutsideCity: s.shippingOutsideCity || 120,
+
+            showAnnouncement: s.showAnnouncement || false,
+            announcementText: s.announcementText || "",
+            announcementLink: s.announcementLink || "",
+            seoDescription: s.seoDescription || "",
+            seoKeywords: s.seoKeywords || "",
+            
             socialLinks: {
-              facebook: data.settings.socialLinks?.facebook || "",
-              instagram: data.settings.socialLinks?.instagram || "",
+              facebook: s.socialLinks?.facebook || "",
+              instagram: s.socialLinks?.instagram || "",
             },
+            footerText: s.footerText || "",
+            refundPolicyUrl: s.refundPolicyUrl || "",
+            privacyPolicyUrl: s.privacyPolicyUrl || "",
+            termsUrl: s.termsUrl || "",
           });
         }
       } catch (error) {
@@ -73,7 +126,7 @@ export default function Settings() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
-    const toastId = toast.loading("Saving changes...");
+    const toastId = toast.loading("Saving configuration to database...");
 
     try {
       const res = await fetch(`${import.meta.env.VITE_API_URL}/settings`, {
@@ -83,14 +136,31 @@ export default function Settings() {
           ...formData,
           shippingInsideCity: Number(formData.shippingInsideCity),
           shippingOutsideCity: Number(formData.shippingOutsideCity),
+          taxRate: Number(formData.taxRate),
         }),
       });
       const data = await res.json();
 
       if (res.ok && data.success) {
-        toast.success("Settings updated successfully!", { id: toastId });
-        // Optional: You can dynamically update browser tab title here
+        toast.success("All systems updated successfully!", { id: toastId });
         document.title = formData.browserTitle;
+        setSettings(data.settings); // Update global admin context
+        
+        // Update CSS vars immediately
+        const root = document.documentElement;
+        root.style.setProperty("--primary-color", formData.colors.primary);
+        root.style.setProperty("--secondary-color", formData.colors.secondary);
+        root.style.setProperty("--optional-color", formData.colors.optional);
+        
+        if (formData.faviconUrl) {
+           let link: HTMLLinkElement | null = document.querySelector("link[rel~='icon']");
+           if (!link) {
+             link = document.createElement("link");
+             link.rel = "icon";
+             document.head.appendChild(link);
+           }
+           link.href = formData.faviconUrl;
+        }
       } else {
         toast.error(data.message || "Failed to update", { id: toastId });
       }
@@ -101,405 +171,313 @@ export default function Settings() {
     }
   };
 
-  // Simulated Image Upload Handler (Can be replaced with Cloudinary later)
-  const handleFileUpload = (
-    e: React.ChangeEvent<HTMLInputElement>,
-    type: "logo" | "favicon",
-  ) => {
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>, type: "logo" | "favicon") => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Validation based on type
-    const isImage =
-      file.type === "image/jpeg" ||
-      file.type === "image/png" ||
-      file.type === "image/x-icon" ||
-      file.type === "image/svg+xml";
-    if (!isImage) {
-      toast.error("Invalid file type. Please upload PNG, JPG, or SVG.");
-      return;
-    }
+    const isImage = ["image/jpeg", "image/png", "image/x-icon", "image/svg+xml", "image/webp"].includes(file.type);
+    if (!isImage) return toast.error("Invalid file type.");
 
-    if (type === "logo" && file.size > 2 * 1024 * 1024) {
-      toast.error("Logo must be less than 2MB.");
-      return;
-    }
-    if (type === "favicon" && file.size > 1 * 1024 * 1024) {
-      toast.error("Favicon must be less than 1MB.");
-      return;
-    }
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const base64String = reader.result as string;
+      if (type === "logo") setFormData(prev => ({ ...prev, logoUrl: base64String }));
+      if (type === "favicon") setFormData(prev => ({ ...prev, faviconUrl: base64String }));
+      toast.success(`Image staged. Save to commit changes.`);
+    };
+    reader.readAsDataURL(file);
+  };
 
-    // Simulating upload by converting to local blob URL (for immediate preview)
-    // In real backend, upload this file using FormData to your server/Cloudinary
-    toast.success(
-      `${type === "logo" ? "Logo" : "Favicon"} selected! Click save to apply.`,
-    );
-    const localUrl = URL.createObjectURL(file);
-
-    if (type === "logo") setFormData({ ...formData, logoUrl: localUrl });
-    if (type === "favicon") setFormData({ ...formData, faviconUrl: localUrl });
+  const handleTextChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>, field: string) => {
+    setFormData(prev => ({ ...prev, [field]: e.target.value }));
   };
 
   if (loading) {
     return (
-      <div className="p-10 text-center text-slate-500 font-bold">
-        Loading Store Settings...
+      <div className="flex h-screen items-center justify-center bg-slate-50">
+        <div className="w-12 h-12 border-4 border-slate-900 border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
 
+  const tabs = [
+    { id: "general", label: "General", icon: <Store size={16} /> },
+    { id: "branding", label: "Branding", icon: <Palette size={16} /> },
+    { id: "commerce", label: "Commerce", icon: <DollarSign size={16} /> },
+    { id: "marketing", label: "Marketing & SEO", icon: <Megaphone size={16} /> },
+    { id: "legal", label: "Legal & Social", icon: <FileText size={16} /> },
+  ];
+
   return (
     <div className="p-8 bg-slate-50 min-h-screen">
-      <div className="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-bold text-slate-900 flex items-center gap-3">
-            <SettingsIcon className="h-8 w-8 text-blue-600" />
-            System Settings
-          </h1>
-          <p className="text-slate-500 mt-1">
-            Manage brand identity, colors, shipping, and core system info.
-          </p>
-        </div>
-        <button
-          onClick={handleSubmit}
-          disabled={saving}
-          className="flex items-center justify-center gap-2 bg-slate-900 hover:bg-blue-600 text-white px-6 py-3 rounded-xl font-bold transition-all shadow-md active:scale-95 disabled:opacity-70"
-        >
-          <Save className="h-5 w-5" />{" "}
-          {saving ? "Saving..." : "Save All Changes"}
-        </button>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Left Column: Brand & Theme */}
-        <div className="lg:col-span-2 space-y-6">
-          {/* Brand Identity & Assets */}
-          <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
-            <h2 className="text-lg font-bold text-slate-800 mb-5 flex items-center gap-2">
-              <ImagePlus className="h-5 w-5 text-indigo-500" /> Brand Identity &
-              Assets
-            </h2>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-              {/* Main Logo */}
-              <div className="border-2 border-dashed border-slate-200 rounded-xl p-5 text-center relative hover:bg-slate-50 transition-colors">
-                <label className="cursor-pointer flex flex-col items-center justify-center h-full">
-                  <input
-                    type="file"
-                    accept="image/png, image/jpeg, image/svg+xml"
-                    className="hidden"
-                    onChange={(e) => handleFileUpload(e, "logo")}
-                  />
-                  {formData.logoUrl ? (
-                    <img
-                      src={formData.logoUrl}
-                      alt="Logo Preview"
-                      className="h-16 object-contain mb-3"
-                    />
-                  ) : (
-                    <UploadCloud className="h-10 w-10 text-slate-400 mb-2" />
-                  )}
-                  <p className="text-sm font-bold text-slate-700">
-                    Upload Main Logo
-                  </p>
-                  <p className="text-[10px] text-slate-400 mt-1">
-                    PNG, JPG or SVG (Max 2MB). Ideal size: 250x100px
-                  </p>
-                </label>
-              </div>
-
-              {/* Favicon */}
-              <div className="border-2 border-dashed border-slate-200 rounded-xl p-5 text-center relative hover:bg-slate-50 transition-colors">
-                <label className="cursor-pointer flex flex-col items-center justify-center h-full">
-                  <input
-                    type="file"
-                    accept="image/png, image/x-icon"
-                    className="hidden"
-                    onChange={(e) => handleFileUpload(e, "favicon")}
-                  />
-                  {formData.faviconUrl ? (
-                    <img
-                      src={formData.faviconUrl}
-                      alt="Favicon Preview"
-                      className="h-10 w-10 object-contain mb-3"
-                    />
-                  ) : (
-                    <LayoutTemplate className="h-10 w-10 text-slate-400 mb-2" />
-                  )}
-                  <p className="text-sm font-bold text-slate-700">
-                    Upload Favicon
-                  </p>
-                  <p className="text-[10px] text-slate-400 mt-1">
-                    ICO or PNG (Max 1MB). Ideal size: 32x32px or 64x64px
-                  </p>
-                </label>
-              </div>
-            </div>
-
+      <div className="max-w-6xl mx-auto">
+        {/* Header */}
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
             <div>
-              <label className="text-xs font-bold text-slate-500 uppercase">
-                Browser Tab Title (Menubar Name)
-              </label>
-              <input
-                type="text"
-                placeholder="e.g. My Awesome Store | Home"
-                value={formData.browserTitle}
-                onChange={(e) =>
-                  setFormData({ ...formData, browserTitle: e.target.value })
-                }
-                className="w-full px-4 py-2 mt-1 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 font-medium"
-              />
-              <p className="text-[11px] text-slate-400 mt-1">
-                This text appears on the user's browser tab.
-              </p>
+                <h1 className="text-3xl font-black text-slate-900 tracking-tight flex items-center gap-3">
+                    <SettingsIcon className="text-blue-600" /> Control Center
+                </h1>
+                <p className="text-sm font-medium text-slate-500 mt-1">Global configuration for storefront and operations.</p>
             </div>
-          </div>
-
-          {/* Theme Colors */}
-          <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
-            <h2 className="text-lg font-bold text-slate-800 mb-5 flex items-center gap-2">
-              <Palette className="h-5 w-5 text-pink-500" /> Theme Colors
-            </h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div>
-                <label className="text-xs font-bold text-slate-500 uppercase block mb-2">
-                  Primary Color
-                </label>
-                <div className="flex items-center gap-3">
-                  <input
-                    type="color"
-                    value={formData.colors.primary}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        colors: { ...formData.colors, primary: e.target.value },
-                      })
-                    }
-                    className="w-10 h-10 rounded cursor-pointer border-0 p-0"
-                  />
-                  <span className="font-mono text-sm text-slate-600 uppercase">
-                    {formData.colors.primary}
-                  </span>
-                </div>
-                <p className="text-[10px] text-slate-400 mt-2">
-                  Main buttons, active links, header
-                </p>
-              </div>
-              <div>
-                <label className="text-xs font-bold text-slate-500 uppercase block mb-2">
-                  Secondary Color
-                </label>
-                <div className="flex items-center gap-3">
-                  <input
-                    type="color"
-                    value={formData.colors.secondary}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        colors: {
-                          ...formData.colors,
-                          secondary: e.target.value,
-                        },
-                      })
-                    }
-                    className="w-10 h-10 rounded cursor-pointer border-0 p-0"
-                  />
-                  <span className="font-mono text-sm text-slate-600 uppercase">
-                    {formData.colors.secondary}
-                  </span>
-                </div>
-                <p className="text-[10px] text-slate-400 mt-2">
-                  Footers, borders, secondary text
-                </p>
-              </div>
-              <div>
-                <label className="text-xs font-bold text-slate-500 uppercase block mb-2">
-                  Optional / Accent Color
-                </label>
-                <div className="flex items-center gap-3">
-                  <input
-                    type="color"
-                    value={formData.colors.optional}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        colors: {
-                          ...formData.colors,
-                          optional: e.target.value,
-                        },
-                      })
-                    }
-                    className="w-10 h-10 rounded cursor-pointer border-0 p-0"
-                  />
-                  <span className="font-mono text-sm text-slate-600 uppercase">
-                    {formData.colors.optional}
-                  </span>
-                </div>
-                <p className="text-[10px] text-slate-400 mt-2">
-                  Badges, sales tags, warnings
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* General Information (Store name, Email, Phone) */}
-          <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
-            <h2 className="text-lg font-bold text-slate-800 mb-5 flex items-center gap-2">
-              <Store className="h-5 w-5 text-purple-500" /> General Information
-            </h2>
-            <div className="space-y-4">
-              <div>
-                <label className="text-xs font-bold text-slate-500 uppercase">
-                  Store Name
-                </label>
-                <input
-                  type="text"
-                  value={formData.storeName}
-                  onChange={(e) =>
-                    setFormData({ ...formData, storeName: e.target.value })
-                  }
-                  className="w-full px-4 py-2 mt-1 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 font-medium"
-                />
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="text-xs font-bold text-slate-500 uppercase flex items-center gap-1">
-                    <Mail className="h-3 w-3" /> Support Email
-                  </label>
-                  <input
-                    type="email"
-                    value={formData.contactEmail}
-                    onChange={(e) =>
-                      setFormData({ ...formData, contactEmail: e.target.value })
-                    }
-                    className="w-full px-4 py-2 mt-1 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 font-medium"
-                  />
-                </div>
-                <div>
-                  <label className="text-xs font-bold text-slate-500 uppercase flex items-center gap-1">
-                    <Phone className="h-3 w-3" /> Support Phone
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.contactPhone}
-                    onChange={(e) =>
-                      setFormData({ ...formData, contactPhone: e.target.value })
-                    }
-                    className="w-full px-4 py-2 mt-1 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 font-medium"
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
+            <button
+                onClick={handleSubmit}
+                disabled={saving}
+                className="flex items-center gap-2 bg-slate-900 text-white px-6 py-3 rounded-xl font-bold hover:bg-blue-600 transition-colors shadow-lg active:scale-95 disabled:opacity-50"
+            >
+                <Save size={18} /> {saving ? "Synchronizing..." : "Save Configuration"}
+            </button>
         </div>
 
-        {/* Right Column: Shipping & Socials */}
-        <div className="space-y-6">
-          {/* Shipping Rates */}
-          <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
-            <h2 className="text-lg font-bold text-slate-800 mb-5 flex items-center gap-2">
-              <Truck className="h-5 w-5 text-amber-500" /> Shipping Rates
-            </h2>
-
-            <div className="space-y-5">
-              <div className="relative">
-                <label className="text-xs font-bold text-slate-500 uppercase">
-                  Inside City (৳ / $)
-                </label>
-                <div className="relative mt-1">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <span className="text-slate-400 font-bold">৳</span>
-                  </div>
-                  <input
-                    type="number"
-                    min="0"
-                    value={formData.shippingInsideCity}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        shippingInsideCity: Number(e.target.value),
-                      })
-                    }
-                    className="w-full pl-8 pr-4 py-2.5 bg-amber-50 border border-amber-200 text-amber-900 rounded-xl focus:ring-2 focus:ring-amber-500 font-black text-lg"
-                  />
+        {/* Global Maintenance Banner */}
+        <div className={`mb-8 p-5 rounded-2xl border flex items-center justify-between transition-colors ${formData.isMaintenanceMode ? 'bg-red-50 border-red-200' : 'bg-white border-slate-200 shadow-sm'}`}>
+            <div className="flex items-center gap-4">
+                <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${formData.isMaintenanceMode ? 'bg-red-100 text-red-600' : 'bg-slate-100 text-slate-400'}`}>
+                    <ShieldAlert size={24} />
                 </div>
-              </div>
-
-              <div className="relative border-t border-slate-100 pt-5">
-                <label className="text-xs font-bold text-slate-500 uppercase">
-                  Outside City (৳ / $)
-                </label>
-                <div className="relative mt-1">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <span className="text-slate-400 font-bold">৳</span>
-                  </div>
-                  <input
-                    type="number"
-                    min="0"
-                    value={formData.shippingOutsideCity}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        shippingOutsideCity: Number(e.target.value),
-                      })
-                    }
-                    className="w-full pl-8 pr-4 py-2.5 bg-amber-50 border border-amber-200 text-amber-900 rounded-xl focus:ring-2 focus:ring-amber-500 font-black text-lg"
-                  />
+                <div>
+                    <h3 className={`font-black text-lg ${formData.isMaintenanceMode ? 'text-red-900' : 'text-slate-900'}`}>Maintenance Mode</h3>
+                    <p className={`text-sm font-medium ${formData.isMaintenanceMode ? 'text-red-700' : 'text-slate-500'}`}>
+                        {formData.isMaintenanceMode ? 'Storefront is currently hidden from public.' : 'Storefront is live and accepting orders.'}
+                    </p>
                 </div>
-              </div>
             </div>
-          </div>
+            <label className="relative inline-flex items-center cursor-pointer">
+                <input 
+                    type="checkbox" 
+                    className="sr-only peer" 
+                    checked={formData.isMaintenanceMode} 
+                    onChange={(e) => setFormData({...formData, isMaintenanceMode: e.target.checked})}
+                />
+                <div className="w-14 h-7 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-red-500"></div>
+            </label>
+        </div>
 
-          {/* Social Media Links */}
-          <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
-            <h2 className="text-lg font-bold text-slate-800 mb-5 flex items-center gap-2">
-              <Globe className="h-5 w-5 text-blue-500" /> Social Presence
-            </h2>
-            <div className="space-y-4">
-              <div>
-                <label className="text-xs font-bold text-slate-500 uppercase flex items-center gap-1">
-                  <Share2 className="h-3 w-3 text-blue-600" /> Facebook Page URL
-                </label>
-                <input
-                  type="url"
-                  placeholder="https://facebook.com/yourstore"
-                  value={formData.socialLinks.facebook}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      socialLinks: {
-                        ...formData.socialLinks,
-                        facebook: e.target.value,
-                      },
-                    })
-                  }
-                  className="w-full px-4 py-2 mt-1 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-              <div>
-                <label className="text-xs font-bold text-slate-500 uppercase flex items-center gap-1">
-                  <Camera className="h-3 w-3 text-pink-600" /> Instagram URL
-                </label>
-                <input
-                  type="url"
-                  placeholder="https://instagram.com/yourstore"
-                  value={formData.socialLinks.instagram}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      socialLinks: {
-                        ...formData.socialLinks,
-                        instagram: e.target.value,
-                      },
-                    })
-                  }
-                  className="w-full px-4 py-2 mt-1 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-            </div>
-          </div>
+        {/* Tab Navigation */}
+        <div className="flex overflow-x-auto no-scrollbar gap-2 mb-8 bg-white p-2 rounded-2xl border border-slate-200 shadow-sm">
+            {tabs.map(tab => (
+                <button
+                    key={tab.id}
+                    onClick={() => setActiveTab(tab.id)}
+                    className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm transition-all whitespace-nowrap ${activeTab === tab.id ? 'bg-slate-900 text-white shadow-md' : 'text-slate-500 hover:bg-slate-100'}`}
+                >
+                    {tab.icon} {tab.label}
+                </button>
+            ))}
+        </div>
+
+        {/* Tab Content Areas */}
+        <div className="bg-white rounded-[32px] border border-slate-200 shadow-sm p-8">
+            
+            {/* 1. GENERAL TAB */}
+            {activeTab === "general" && (
+                <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-300">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div>
+                            <h3 className="text-xs font-black uppercase tracking-[0.2em] text-slate-400 mb-4 flex items-center gap-2"><Store size={14} /> Identity</h3>
+                            <div className="space-y-4">
+                                <FormInput label="Store Name" value={formData.storeName} onChange={(e) => handleTextChange(e, 'storeName')} placeholder="e.g. My Awesome Store" />
+                                <FormInput label="Browser Tab Title" value={formData.browserTitle} onChange={(e) => handleTextChange(e, 'browserTitle')} placeholder="Appears in browser tab" />
+                            </div>
+                        </div>
+                        <div>
+                            <h3 className="text-xs font-black uppercase tracking-[0.2em] text-slate-400 mb-4 flex items-center gap-2"><Mail size={14} /> Contact Details</h3>
+                            <div className="space-y-4">
+                                <FormInput label="Support Email" type="email" value={formData.contactEmail} onChange={(e) => handleTextChange(e, 'contactEmail')} />
+                                <FormInput label="Support Phone" value={formData.contactPhone} onChange={(e) => handleTextChange(e, 'contactPhone')} />
+                                <div>
+                                    <label className="text-xs font-bold text-slate-600 block mb-1.5">Physical Address</label>
+                                    <textarea 
+                                        value={formData.storeAddress} 
+                                        onChange={(e) => handleTextChange(e, 'storeAddress')} 
+                                        className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none font-medium text-sm min-h-[100px]"
+                                        placeholder="Full store address for invoices and footer"
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* 2. BRANDING TAB */}
+            {activeTab === "branding" && (
+                <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-300">
+                    <h3 className="text-xs font-black uppercase tracking-[0.2em] text-slate-400 mb-4 flex items-center gap-2"><ImagePlus size={14} /> Visual Assets</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+                        {/* Logo Upload */}
+                        <div className="border-2 border-dashed border-slate-200 rounded-3xl p-8 text-center relative hover:bg-slate-50 transition-colors group">
+                            <label className="cursor-pointer flex flex-col items-center justify-center h-full">
+                                <input type="file" accept="image/*" className="hidden" onChange={(e) => handleFileUpload(e, "logo")} />
+                                {formData.logoUrl ? (
+                                    <div className="bg-slate-100 p-4 rounded-2xl mb-4 group-hover:scale-105 transition-transform"><img src={formData.logoUrl} alt="Logo" className="h-16 object-contain" /></div>
+                                ) : (
+                                    <div className="w-16 h-16 bg-blue-50 text-blue-500 rounded-2xl flex items-center justify-center mb-4"><UploadCloud size={24} /></div>
+                                )}
+                                <p className="font-bold text-slate-800">Primary Logo</p>
+                                <p className="text-xs font-medium text-slate-400 mt-1">Recommended: 250x100px transparent PNG</p>
+                            </label>
+                        </div>
+                        {/* Favicon Upload */}
+                        <div className="border-2 border-dashed border-slate-200 rounded-3xl p-8 text-center relative hover:bg-slate-50 transition-colors group">
+                            <label className="cursor-pointer flex flex-col items-center justify-center h-full">
+                                <input type="file" accept="image/*" className="hidden" onChange={(e) => handleFileUpload(e, "favicon")} />
+                                {formData.faviconUrl ? (
+                                    <div className="bg-slate-100 p-4 rounded-2xl mb-4 group-hover:scale-105 transition-transform"><img src={formData.faviconUrl} alt="Favicon" className="h-12 w-12 object-contain" /></div>
+                                ) : (
+                                    <div className="w-16 h-16 bg-purple-50 text-purple-500 rounded-2xl flex items-center justify-center mb-4"><LayoutTemplate size={24} /></div>
+                                )}
+                                <p className="font-bold text-slate-800">Browser Favicon</p>
+                                <p className="text-xs font-medium text-slate-400 mt-1">Recommended: 32x32px ICO or PNG</p>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div className="pt-8 border-t border-slate-100">
+                        <h3 className="text-xs font-black uppercase tracking-[0.2em] text-slate-400 mb-6 flex items-center gap-2"><Palette size={14} /> Theme Palette</h3>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            <ColorPicker label="Primary Color" value={formData.colors.primary} onChange={(v) => setFormData({ ...formData, colors: { ...formData.colors, primary: v }})} desc="Buttons & active states" />
+                            <ColorPicker label="Secondary Color" value={formData.colors.secondary} onChange={(v) => setFormData({ ...formData, colors: { ...formData.colors, secondary: v }})} desc="Footers & subtle elements" />
+                            <ColorPicker label="Accent Color" value={formData.colors.optional} onChange={(v) => setFormData({ ...formData, colors: { ...formData.colors, optional: v }})} desc="Badges & warnings" />
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* 3. COMMERCE TAB */}
+            {activeTab === "commerce" && (
+                <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-300">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div>
+                            <h3 className="text-xs font-black uppercase tracking-[0.2em] text-slate-400 mb-4 flex items-center gap-2"><DollarSign size={14} /> Financial</h3>
+                            <div className="space-y-4">
+                                <div className="grid grid-cols-2 gap-4">
+                                    <FormInput label="Currency Symbol" value={formData.currencySymbol} onChange={(e) => handleTextChange(e, 'currencySymbol')} />
+                                    <FormInput label="Currency Code" value={formData.currencyCode} onChange={(e) => handleTextChange(e, 'currencyCode')} />
+                                </div>
+                                <div>
+                                    <label className="text-xs font-bold text-slate-600 block mb-1.5">Default Tax / VAT Rate (%)</label>
+                                    <div className="relative">
+                                        <Percent className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+                                        <input type="number" value={formData.taxRate} onChange={(e) => handleTextChange(e, 'taxRate')} className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl font-bold outline-none focus:ring-2 focus:ring-blue-500" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <h3 className="text-xs font-black uppercase tracking-[0.2em] text-slate-400 mb-4 flex items-center gap-2"><Truck size={14} /> Shipping Rates</h3>
+                            <div className="space-y-4">
+                                <div>
+                                    <label className="text-xs font-bold text-slate-600 block mb-1.5">Inside City Delivery</label>
+                                    <div className="relative">
+                                        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold">{formData.currencySymbol}</span>
+                                        <input type="number" value={formData.shippingInsideCity} onChange={(e) => handleTextChange(e, 'shippingInsideCity')} className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl font-bold outline-none focus:ring-2 focus:ring-blue-500" />
+                                    </div>
+                                </div>
+                                <div>
+                                    <label className="text-xs font-bold text-slate-600 block mb-1.5">Outside City Delivery</label>
+                                    <div className="relative">
+                                        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold">{formData.currencySymbol}</span>
+                                        <input type="number" value={formData.shippingOutsideCity} onChange={(e) => handleTextChange(e, 'shippingOutsideCity')} className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl font-bold outline-none focus:ring-2 focus:ring-blue-500" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* 4. MARKETING & SEO TAB */}
+            {activeTab === "marketing" && (
+                <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-300">
+                    <div>
+                        <div className="flex items-center justify-between mb-4">
+                            <h3 className="text-xs font-black uppercase tracking-[0.2em] text-slate-400 flex items-center gap-2"><Megaphone size={14} /> Global Announcement Bar</h3>
+                            <label className="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" className="sr-only peer" checked={formData.showAnnouncement} onChange={(e) => setFormData({...formData, showAnnouncement: e.target.checked})} />
+                                <div className="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-600"></div>
+                            </label>
+                        </div>
+                        <div className={`space-y-4 ${!formData.showAnnouncement && 'opacity-50 pointer-events-none'}`}>
+                            <FormInput label="Announcement Text" value={formData.announcementText} onChange={(e) => handleTextChange(e, 'announcementText')} placeholder="e.g. Free shipping on orders over $50!" />
+                            <FormInput label="Banner Link (Optional)" value={formData.announcementLink} onChange={(e) => handleTextChange(e, 'announcementLink')} placeholder="e.g. /flash-sales" />
+                        </div>
+                    </div>
+
+                    <div className="pt-8 border-t border-slate-100">
+                        <h3 className="text-xs font-black uppercase tracking-[0.2em] text-slate-400 mb-4 flex items-center gap-2"><Search size={14} /> Search Engine Optimization</h3>
+                        <div className="space-y-4">
+                            <div>
+                                <label className="text-xs font-bold text-slate-600 block mb-1.5">Meta Description</label>
+                                <textarea value={formData.seoDescription} onChange={(e) => handleTextChange(e, 'seoDescription')} className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none font-medium text-sm min-h-[80px]" placeholder="Brief description of your store for Google results" />
+                            </div>
+                            <FormInput label="Meta Keywords" value={formData.seoKeywords} onChange={(e) => handleTextChange(e, 'seoKeywords')} placeholder="e.g. ecommerce, fashion, online store" />
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* 5. LEGAL & SOCIAL TAB */}
+            {activeTab === "legal" && (
+                <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-300">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div>
+                            <h3 className="text-xs font-black uppercase tracking-[0.2em] text-slate-400 mb-4 flex items-center gap-2"><Share2 size={14} /> Social Connections</h3>
+                            <div className="space-y-4">
+                                <FormInput label="Facebook Page URL" value={formData.socialLinks.facebook} onChange={(e) => setFormData({...formData, socialLinks: {...formData.socialLinks, facebook: e.target.value}})} placeholder="https://facebook.com/..." />
+                                <FormInput label="Instagram URL" value={formData.socialLinks.instagram} onChange={(e) => setFormData({...formData, socialLinks: {...formData.socialLinks, instagram: e.target.value}})} placeholder="https://instagram.com/..." />
+                            </div>
+                        </div>
+                        <div>
+                            <h3 className="text-xs font-black uppercase tracking-[0.2em] text-slate-400 mb-4 flex items-center gap-2"><FileText size={14} /> Legal Pages & Footer</h3>
+                            <div className="space-y-4">
+                                <FormInput label="Footer Copyright Text" value={formData.footerText} onChange={(e) => handleTextChange(e, 'footerText')} placeholder="© 2024 Your Store. All rights reserved." />
+                                <FormInput label="Privacy Policy URL" value={formData.privacyPolicyUrl} onChange={(e) => handleTextChange(e, 'privacyPolicyUrl')} placeholder="/privacy-policy" />
+                                <FormInput label="Terms of Service URL" value={formData.termsUrl} onChange={(e) => handleTextChange(e, 'termsUrl')} placeholder="/terms" />
+                                <FormInput label="Refund Policy URL" value={formData.refundPolicyUrl} onChange={(e) => handleTextChange(e, 'refundPolicyUrl')} placeholder="/refund-policy" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
         </div>
       </div>
     </div>
   );
+}
+
+// Helper Components
+function FormInput({ label, type = "text", value, onChange, placeholder }: any) {
+    return (
+        <div>
+            <label className="text-xs font-bold text-slate-600 block mb-1.5">{label}</label>
+            <input 
+                type={type} 
+                value={value} 
+                onChange={onChange} 
+                placeholder={placeholder}
+                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none font-medium text-sm transition-all"
+            />
+        </div>
+    )
+}
+
+function ColorPicker({ label, value, onChange, desc }: any) {
+    return (
+        <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100 flex items-center gap-4">
+            <div className="relative w-12 h-12 rounded-xl overflow-hidden shrink-0 shadow-sm border border-slate-200">
+                <input 
+                    type="color" 
+                    value={value} 
+                    onChange={(e) => onChange(e.target.value)}
+                    className="absolute -top-2 -left-2 w-16 h-16 cursor-pointer"
+                />
+            </div>
+            <div>
+                <p className="text-sm font-bold text-slate-800">{label}</p>
+                <p className="text-xs font-black text-slate-500 font-mono uppercase">{value}</p>
+                <p className="text-[10px] text-slate-400 font-medium mt-1">{desc}</p>
+            </div>
+        </div>
+    )
 }

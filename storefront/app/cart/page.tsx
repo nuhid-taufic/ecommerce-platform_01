@@ -16,6 +16,7 @@ import {
 import toast from "react-hot-toast";
 import { useCartStore } from "@/store/cartStore";
 import { useAuthStore } from "@/store/authStore";
+import { useSettingsStore } from "@/store/settingsStore";
 
 import { bdDistricts, bdUpazilas } from "@/utils/bd-data";
 
@@ -27,6 +28,7 @@ export default function CartPage() {
     decreaseQuantity,
     clearCart,
   } = useCartStore();
+  const { settings } = useSettingsStore();
 
   const cartItems = items || [];
   const [isClient, setIsClient] = useState(false);
@@ -88,7 +90,12 @@ export default function CartPage() {
     (acc: number, item: any) => acc + item.price * item.quantity,
     0,
   );
-  const shippingCost = deliveryZone === "Inside Dhaka" ? 60 : 120;
+  
+  const insideCityRate = settings?.shippingInsideCity ?? 60;
+  const outsideCityRate = settings?.shippingOutsideCity ?? 120;
+  const currency = settings?.currencySymbol || "BDT";
+  
+  const shippingCost = deliveryZone === "Inside Dhaka" ? insideCityRate : outsideCityRate;
 
   let discountAmount = 0;
   if (appliedCoupon) {
@@ -111,7 +118,7 @@ export default function CartPage() {
       const data = await res.json();
       if (data.success) {
         if (totalPrice < (data.coupon.minOrderAmount || 0)) {
-          toast.error(`Minimum order amount for this coupon is ৳${data.coupon.minOrderAmount}`);
+          toast.error(`Minimum order amount for this coupon is ${currency}${data.coupon.minOrderAmount}`);
         } else {
           toast.success("Coupon applied successfully!");
           setAppliedCoupon(data.coupon);
@@ -250,7 +257,7 @@ export default function CartPage() {
             {/* Order Review */}
             <section className="bg-white rounded-xl p-6 border border-gray-200 shadow-sm">
               <div className="flex items-center gap-2 mb-4">
-                <div className="w-1 h-4 bg-black rounded-full"></div>
+                <div className="w-1 h-4 bg-primary rounded-full"></div>
                 <h2 className="text-base font-bold">Order review</h2>
               </div>
               
@@ -266,11 +273,11 @@ export default function CartPage() {
                         <div className="flex items-center gap-4 mt-2 text-sm">
                           <span className="text-gray-500">Qty:</span>
                           <div className="flex items-center bg-gray-100 rounded-md px-2 py-1">
-                            <button onClick={() => decreaseQuantity(item._id)} className="text-black font-bold px-1"><Minus size={14} /></button>
+                            <button onClick={() => decreaseQuantity(item._id)} className="text-secondary font-bold px-1"><Minus size={14} /></button>
                             <span className="w-6 text-center font-medium">{item.quantity}</span>
-                            <button onClick={() => increaseQuantity(item._id)} className="text-black font-bold px-1" disabled={item.quantity >= (item.stock || 999)}><Plus size={14} /></button>
+                            <button onClick={() => increaseQuantity(item._id)} className="text-secondary font-bold px-1" disabled={item.quantity >= (item.stock || 999)}><Plus size={14} /></button>
                           </div>
-                          <span className="font-bold ml-2">৳{(item.price * item.quantity).toFixed(2)}</span>
+                          <span className="font-bold ml-2">{currency}{(item.price * item.quantity).toFixed(2)}</span>
                         </div>
                       </div>
                     </div>
@@ -288,7 +295,7 @@ export default function CartPage() {
             {/* Shipping Address */}
             <section className="bg-white rounded-xl p-6 border border-gray-200 shadow-sm">
               <div className="flex items-center gap-2 mb-4">
-                <div className="w-1 h-4 bg-black rounded-full"></div>
+                <div className="w-1 h-4 bg-primary rounded-full"></div>
                 <h2 className="text-base font-bold">Shipping Address</h2>
               </div>
 
@@ -315,12 +322,12 @@ export default function CartPage() {
                               });
                             }
                           }}
-                          className={`p-3 rounded-xl border-2 cursor-pointer transition-all ${isSelected ? 'border-black bg-gray-50' : 'border-gray-200 hover:border-gray-300'}`}
+                          className={`p-3 rounded-xl border-2 cursor-pointer transition-all ${isSelected ? 'border-primary bg-gray-50' : 'border-gray-200 hover:border-gray-300'}`}
                         >
                           <div className="flex items-center gap-2 mb-1">
-                            <MapPin size={14} className={isSelected ? 'text-black' : 'text-gray-500'} />
+                            <MapPin size={14} className={isSelected ? 'text-secondary' : 'text-gray-500'} />
                             <span className="text-xs font-bold uppercase tracking-widest">{addr.label || addr.type || 'Address'}</span>
-                            {isSelected && <CheckCircle2 size={14} className="ml-auto text-black" />}
+                            {isSelected && <CheckCircle2 size={14} className="ml-auto text-secondary" />}
                           </div>
                           <p className="text-xs text-gray-600 line-clamp-2 mt-2">{addrLine}, {addr.thana}, {addr.district}</p>
                         </div>
@@ -328,7 +335,7 @@ export default function CartPage() {
                     })}
                     <div 
                       onClick={() => setShippingAddress({ name: "", phone: "", district: "Dhaka", thana: "", addressLine: "" })}
-                      className={`p-3 rounded-xl border-2 border-dashed cursor-pointer transition-all flex flex-col items-center justify-center min-h-[80px] ${!shippingAddress.addressLine ? 'border-black bg-gray-50 text-black' : 'border-gray-300 text-gray-500 hover:border-gray-400 hover:text-black'}`}
+                      className={`p-3 rounded-xl border-2 border-dashed cursor-pointer transition-all flex flex-col items-center justify-center min-h-[80px] ${!shippingAddress.addressLine ? 'border-primary bg-gray-50 text-secondary' : 'border-gray-300 text-gray-500 hover:border-gray-400 hover:text-secondary'}`}
                     >
                       <Plus size={20} className="mb-1" />
                       <span className="text-xs font-bold uppercase tracking-widest">New Address</span>
@@ -344,7 +351,7 @@ export default function CartPage() {
                     placeholder="Your Full Name *" 
                     value={shippingAddress.name}
                     onChange={(e) => setShippingAddress({...shippingAddress, name: e.target.value})}
-                    className="w-full border border-gray-300 rounded-md px-4 py-2.5 text-sm focus:outline-none focus:border-black"
+                    className="w-full border border-gray-300 rounded-md px-4 py-2.5 text-sm focus:outline-none focus:border-primary"
                   />
                   <div className="flex w-full">
                     <span className="bg-gray-100 border border-gray-300 border-r-0 rounded-l-md px-4 py-2.5 text-sm text-gray-600 flex items-center justify-center">88</span>
@@ -353,7 +360,7 @@ export default function CartPage() {
                       placeholder="017********" 
                       value={shippingAddress.phone}
                       onChange={(e) => setShippingAddress({...shippingAddress, phone: e.target.value})}
-                      className="w-full border border-gray-300 rounded-r-md px-4 py-2.5 text-sm focus:outline-none focus:border-black"
+                      className="w-full border border-gray-300 rounded-r-md px-4 py-2.5 text-sm focus:outline-none focus:border-primary"
                     />
                   </div>
                 </div>
@@ -366,7 +373,7 @@ export default function CartPage() {
                       const defaultThana = bdUpazilas[newDistrict]?.[0] || "";
                       setShippingAddress({...shippingAddress, district: newDistrict, thana: defaultThana});
                     }}
-                    className="w-full border border-gray-300 rounded-md px-4 py-2.5 text-sm focus:outline-none focus:border-black bg-white"
+                    className="w-full border border-gray-300 rounded-md px-4 py-2.5 text-sm focus:outline-none focus:border-primary bg-white"
                   >
                     <option value="">Select District *</option>
                     {bdDistricts.map(dist => <option key={dist} value={dist}>{dist}</option>)}
@@ -375,7 +382,7 @@ export default function CartPage() {
                     value={shippingAddress.thana}
                     onChange={(e) => setShippingAddress({...shippingAddress, thana: e.target.value})}
                     disabled={!shippingAddress.district}
-                    className="w-full border border-gray-300 rounded-md px-4 py-2.5 text-sm focus:outline-none focus:border-black bg-white disabled:opacity-50"
+                    className="w-full border border-gray-300 rounded-md px-4 py-2.5 text-sm focus:outline-none focus:border-primary bg-white disabled:opacity-50"
                   >
                     <option value="">Select Upazilla / Thana *</option>
                     {shippingAddress.district && bdUpazilas[shippingAddress.district]?.map(thana => <option key={thana} value={thana}>{thana}</option>)}
@@ -386,7 +393,7 @@ export default function CartPage() {
                   placeholder="ex: House no. / building / street / area *"
                   value={shippingAddress.addressLine}
                   onChange={(e) => setShippingAddress({...shippingAddress, addressLine: e.target.value})}
-                  className="w-full border border-gray-300 rounded-md px-4 py-3 text-sm focus:outline-none focus:border-black resize-none min-h-[80px]"
+                  className="w-full border border-gray-300 rounded-md px-4 py-3 text-sm focus:outline-none focus:border-primary resize-none min-h-[80px]"
                 ></textarea>
 
                 {user && (
@@ -407,7 +414,7 @@ export default function CartPage() {
             <section className="bg-white rounded-xl p-6 border border-gray-200 shadow-sm relative">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
-                  <div className="w-1 h-4 bg-black rounded-full"></div>
+                  <div className="w-1 h-4 bg-primary rounded-full"></div>
                   <h2 className="text-base font-bold">Billing Address</h2>
                 </div>
                 <label className="flex items-center gap-2 cursor-pointer text-sm">
@@ -446,12 +453,12 @@ export default function CartPage() {
                                   });
                                 }
                               }}
-                              className={`p-3 rounded-xl border-2 cursor-pointer transition-all ${isSelected ? 'border-black bg-gray-50' : 'border-gray-200 hover:border-gray-300'}`}
+                              className={`p-3 rounded-xl border-2 cursor-pointer transition-all ${isSelected ? 'border-primary bg-gray-50' : 'border-gray-200 hover:border-gray-300'}`}
                             >
                               <div className="flex items-center gap-2 mb-1">
-                                <MapPin size={14} className={isSelected ? 'text-black' : 'text-gray-500'} />
+                                <MapPin size={14} className={isSelected ? 'text-secondary' : 'text-gray-500'} />
                                 <span className="text-xs font-bold uppercase tracking-widest">{addr.label || addr.type || 'Address'}</span>
-                                {isSelected && <CheckCircle2 size={14} className="ml-auto text-black" />}
+                                {isSelected && <CheckCircle2 size={14} className="ml-auto text-secondary" />}
                               </div>
                               <p className="text-xs text-gray-600 line-clamp-2 mt-2">{addrLine}, {addr.thana}, {addr.district}</p>
                             </div>
@@ -459,7 +466,7 @@ export default function CartPage() {
                         })}
                         <div 
                           onClick={() => setBillingAddress({ name: "", phone: "", district: "Dhaka", thana: "", addressLine: "" })}
-                          className={`p-3 rounded-xl border-2 border-dashed cursor-pointer transition-all flex flex-col items-center justify-center min-h-[80px] ${!billingAddress.addressLine ? 'border-black bg-gray-50 text-black' : 'border-gray-300 text-gray-500 hover:border-gray-400 hover:text-black'}`}
+                          className={`p-3 rounded-xl border-2 border-dashed cursor-pointer transition-all flex flex-col items-center justify-center min-h-[80px] ${!billingAddress.addressLine ? 'border-primary bg-gray-50 text-secondary' : 'border-gray-300 text-gray-500 hover:border-gray-400 hover:text-secondary'}`}
                         >
                           <Plus size={20} className="mb-1" />
                           <span className="text-xs font-bold uppercase tracking-widest">New Address</span>
@@ -474,7 +481,7 @@ export default function CartPage() {
                       placeholder="Your Full Name *" 
                       value={billingAddress.name}
                       onChange={(e) => setBillingAddress({...billingAddress, name: e.target.value})}
-                      className="w-full border border-gray-300 rounded-md px-4 py-2.5 text-sm focus:outline-none focus:border-black"
+                      className="w-full border border-gray-300 rounded-md px-4 py-2.5 text-sm focus:outline-none focus:border-primary"
                     />
                     <div className="flex w-full">
                       <span className="bg-gray-100 border border-gray-300 border-r-0 rounded-l-md px-4 py-2.5 text-sm text-gray-600 flex items-center justify-center">88</span>
@@ -483,7 +490,7 @@ export default function CartPage() {
                         placeholder="017********" 
                         value={billingAddress.phone}
                         onChange={(e) => setBillingAddress({...billingAddress, phone: e.target.value})}
-                        className="w-full border border-gray-300 rounded-r-md px-4 py-2.5 text-sm focus:outline-none focus:border-black"
+                        className="w-full border border-gray-300 rounded-r-md px-4 py-2.5 text-sm focus:outline-none focus:border-primary"
                       />
                     </div>
                   </div>
@@ -496,7 +503,7 @@ export default function CartPage() {
                         const defaultThana = bdUpazilas[newDistrict]?.[0] || "";
                         setBillingAddress({...billingAddress, district: newDistrict, thana: defaultThana});
                       }}
-                      className="w-full border border-gray-300 rounded-md px-4 py-2.5 text-sm focus:outline-none focus:border-black bg-white"
+                      className="w-full border border-gray-300 rounded-md px-4 py-2.5 text-sm focus:outline-none focus:border-primary bg-white"
                     >
                       <option value="">Select District *</option>
                       {bdDistricts.map(dist => <option key={dist} value={dist}>{dist}</option>)}
@@ -505,7 +512,7 @@ export default function CartPage() {
                       value={billingAddress.thana}
                       onChange={(e) => setBillingAddress({...billingAddress, thana: e.target.value})}
                       disabled={!billingAddress.district}
-                      className="w-full border border-gray-300 rounded-md px-4 py-2.5 text-sm focus:outline-none focus:border-black bg-white disabled:opacity-50"
+                      className="w-full border border-gray-300 rounded-md px-4 py-2.5 text-sm focus:outline-none focus:border-primary bg-white disabled:opacity-50"
                     >
                       <option value="">Select Upazilla / Thana *</option>
                       {billingAddress.district && bdUpazilas[billingAddress.district]?.map(thana => <option key={thana} value={thana}>{thana}</option>)}
@@ -516,7 +523,7 @@ export default function CartPage() {
                     placeholder="ex: House no. / building / street / area *"
                     value={billingAddress.addressLine}
                     onChange={(e) => setBillingAddress({...billingAddress, addressLine: e.target.value})}
-                    className="w-full border border-gray-300 rounded-md px-4 py-3 text-sm focus:outline-none focus:border-black resize-none min-h-[80px]"
+                    className="w-full border border-gray-300 rounded-md px-4 py-3 text-sm focus:outline-none focus:border-primary resize-none min-h-[80px]"
                   ></textarea>
                 </div>
               )}
@@ -529,20 +536,20 @@ export default function CartPage() {
             {/* Delivery Zone */}
             <section className="bg-white rounded-xl p-6 border border-gray-200 shadow-sm">
               <div className="flex items-center gap-2 mb-4">
-                <div className="w-1 h-4 bg-black rounded-full"></div>
+                <div className="w-1 h-4 bg-primary rounded-full"></div>
                 <h2 className="text-base font-bold">Delivery Zone</h2>
               </div>
 
               <div className="space-y-3">
                 {(["Inside Dhaka", "Outside Dhaka"] as const).map((zone) => (
-                  <label key={zone} onClick={() => setDeliveryZone(zone)} className={`flex items-center justify-between p-3 border rounded-md cursor-pointer transition-colors ${deliveryZone === zone ? 'border-black bg-gray-50' : 'border-gray-200'}`}>
+                  <label key={zone} onClick={() => setDeliveryZone(zone)} className={`flex items-center justify-between p-3 border rounded-md cursor-pointer transition-colors ${deliveryZone === zone ? 'border-primary bg-gray-50' : 'border-gray-200'}`}>
                     <div className="flex items-center gap-3">
                       <div className={`w-8 h-8 flex items-center justify-center rounded font-bold text-xl bg-blue-50 text-blue-600`}>
                         📍
                       </div>
-                      <span className="text-sm font-medium">{zone} {zone === "Inside Dhaka" ? "(৳60)" : "(৳120)"}</span>
+                      <span className="text-sm font-medium">{zone} {zone === "Inside Dhaka" ? `(${currency}${insideCityRate})` : `(${currency}${outsideCityRate})`}</span>
                     </div>
-                    <div className={`w-5 h-5 rounded-full border flex items-center justify-center ${deliveryZone === zone ? 'border-black bg-black text-white' : 'border-gray-300'}`}>
+                    <div className={`w-5 h-5 rounded-full border flex items-center justify-center ${deliveryZone === zone ? 'border-primary bg-primary text-white' : 'border-gray-300'}`}>
                       {deliveryZone === zone && <CheckCircle2 size={14} />}
                     </div>
                   </label>
@@ -553,20 +560,20 @@ export default function CartPage() {
             {/* Payment Method */}
             <section className="bg-white rounded-xl p-6 border border-gray-200 shadow-sm">
               <div className="flex items-center gap-2 mb-4">
-                <div className="w-1 h-4 bg-black rounded-full"></div>
+                <div className="w-1 h-4 bg-primary rounded-full"></div>
                 <h2 className="text-base font-bold">Payment method</h2>
               </div>
 
               <div className="space-y-3">
                 {(["Cash on Delivery", "Bkash", "Nagad", "Rocket"] as const).map((method) => (
-                  <label key={method} onClick={() => setPaymentMethod(method)} className={`flex items-center justify-between p-3 border rounded-md cursor-pointer transition-colors ${paymentMethod === method ? 'border-black bg-gray-50' : 'border-gray-200'}`}>
+                  <label key={method} onClick={() => setPaymentMethod(method)} className={`flex items-center justify-between p-3 border rounded-md cursor-pointer transition-colors ${paymentMethod === method ? 'border-primary bg-gray-50' : 'border-gray-200'}`}>
                     <div className="flex items-center gap-3">
                       <div className={`w-8 h-8 flex items-center justify-center rounded font-bold overflow-hidden text-[10px] leading-tight ${method === 'Cash on Delivery' ? 'bg-blue-50 text-xl' : method === 'Bkash' ? 'bg-pink-50 text-pink-600' : method === 'Nagad' ? 'bg-orange-50 text-orange-600' : 'bg-purple-50 text-purple-600'}`}>
                         {method === 'Cash on Delivery' ? '💵' : method}
                       </div>
                       <span className="text-sm font-medium">{method}</span>
                     </div>
-                    <div className={`w-5 h-5 rounded-full border flex items-center justify-center ${paymentMethod === method ? 'border-black bg-black text-white' : 'border-gray-300'}`}>
+                    <div className={`w-5 h-5 rounded-full border flex items-center justify-center ${paymentMethod === method ? 'border-primary bg-primary text-white' : 'border-gray-300'}`}>
                       {paymentMethod === method && <CheckCircle2 size={14} />}
                     </div>
                   </label>
@@ -577,7 +584,7 @@ export default function CartPage() {
                 <div className="mt-4 p-4 bg-gray-50 border border-gray-200 rounded-md">
                   <p className="text-sm text-gray-700 mb-3 leading-relaxed">
                     Please send the total amount to our <strong>{paymentMethod}</strong> number: <br/>
-                    <span className="text-xl font-bold text-black block mt-1">01977622623</span>
+                    <span className="text-xl font-bold text-secondary block mt-1">01977622623</span>
                     <span className="text-xs text-gray-500 mt-1 block">Account Type: Personal</span>
                   </p>
                   <div className="mt-3">
@@ -587,7 +594,7 @@ export default function CartPage() {
                       placeholder="e.g. 8N7A6B5C"
                       value={transactionId}
                       onChange={(e) => setTransactionId(e.target.value)}
-                      className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:border-black bg-white"
+                      className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:border-primary bg-white"
                     />
                   </div>
                 </div>
@@ -604,7 +611,7 @@ export default function CartPage() {
                   className="w-full flex items-center justify-between text-sm font-bold text-gray-800"
                 >
                   Have any coupon or gift voucher?
-                  {isCouponOpen ? <ChevronUp size={16} className="text-black" /> : <ChevronDown size={16} className="text-black" />}
+                  {isCouponOpen ? <ChevronUp size={16} className="text-secondary" /> : <ChevronDown size={16} className="text-secondary" />}
                 </button>
                 {isCouponOpen && !appliedCoupon && (
                   <div className="mt-3 flex gap-2">
@@ -613,12 +620,12 @@ export default function CartPage() {
                       placeholder="Enter code" 
                       value={couponCode}
                       onChange={(e) => setCouponCode(e.target.value)}
-                      className="flex-1 border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:border-black"
+                      className="flex-1 border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:border-primary"
                     />
                     <button 
                       onClick={handleApplyCoupon}
                       disabled={isApplyingCoupon}
-                      className="bg-gray-800 text-white px-4 py-2 rounded-md text-sm hover:bg-black transition disabled:opacity-50"
+                      className="bg-gray-800 text-white px-4 py-2 rounded-md text-sm hover:bg-primary transition disabled:opacity-50"
                     >
                       {isApplyingCoupon ? "..." : "Apply"}
                     </button>
@@ -629,7 +636,7 @@ export default function CartPage() {
                     <div>
                       <p className="text-sm font-bold text-emerald-800 uppercase tracking-widest">{appliedCoupon.code}</p>
                       <p className="text-xs text-emerald-600 mt-0.5">
-                        {appliedCoupon.discountType === "percentage" ? `${appliedCoupon.discountValue}% OFF` : `৳${appliedCoupon.discountValue} OFF`}
+                        {appliedCoupon.discountType === "percentage" ? `${appliedCoupon.discountValue}% OFF` : `${currency}${appliedCoupon.discountValue} OFF`}
                       </p>
                     </div>
                     <button 
@@ -646,34 +653,34 @@ export default function CartPage() {
               <div className="space-y-3 mb-6">
                 <div className="flex justify-between items-center text-sm">
                   <span className="text-gray-600">Sub total</span>
-                  <span className="font-medium text-gray-800">৳{totalPrice.toFixed(2)}</span>
+                  <span className="font-medium text-gray-800">{currency}{totalPrice.toFixed(2)}</span>
                 </div>
                 {appliedCoupon && (
                   <div className="flex justify-between items-center text-sm text-emerald-600">
                     <span className="font-medium">Discount ({appliedCoupon.code})</span>
-                    <span className="font-medium">-৳{discountAmount.toFixed(2)}</span>
+                    <span className="font-medium">-{currency}{discountAmount.toFixed(2)}</span>
                   </div>
                 )}
                 <div className="flex justify-between items-center text-sm">
                   <span className="text-gray-600">Delivery cost</span>
-                  <span className="font-medium text-gray-800">৳{shippingCost.toFixed(2)}</span>
+                  <span className="font-medium text-gray-800">{currency}{shippingCost.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between items-center pt-3 border-t border-gray-100 mt-3">
                   <span className="font-bold text-gray-800">Total</span>
-                  <span className="text-lg font-bold text-gray-900">৳{finalTotal.toFixed(2)}</span>
+                  <span className="text-lg font-bold text-gray-900">{currency}{finalTotal.toFixed(2)}</span>
                 </div>
               </div>
 
               {/* Special Notes */}
               <div className="mb-6">
                 <div className="flex items-center gap-2 mb-2">
-                  <div className="w-1 h-3 bg-black rounded-full"></div>
+                  <div className="w-1 h-3 bg-primary rounded-full"></div>
                   <label className="text-sm font-bold text-gray-800">Special notes <span className="text-xs font-normal text-gray-500">(Optional)</span></label>
                 </div>
                 <textarea 
                   value={orderNote}
                   onChange={(e) => setOrderNote(e.target.value)}
-                  className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:border-black min-h-[80px] resize-none"
+                  className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:border-primary min-h-[80px] resize-none"
                 ></textarea>
               </div>
 
@@ -687,7 +694,7 @@ export default function CartPage() {
                     className="mt-1 w-4 h-4 accent-black rounded cursor-pointer shrink-0"
                   />
                   <span className="text-xs text-gray-600">
-                    I have read and agree to the <Link href="/terms" target="_blank" className="font-bold underline hover:text-black">Terms and Conditions</Link>, <Link href="/privacy" target="_blank" className="font-bold underline hover:text-black">Privacy Policy</Link> & <Link href="/shipping-returns" target="_blank" className="font-bold underline hover:text-black">Refund and Return Policy</Link>.
+                    I have read and agree to the <Link href="/terms" target="_blank" className="font-bold underline hover:text-secondary">Terms and Conditions</Link>, <Link href="/privacy" target="_blank" className="font-bold underline hover:text-secondary">Privacy Policy</Link> & <Link href="/shipping-returns" target="_blank" className="font-bold underline hover:text-secondary">Refund and Return Policy</Link>.
                   </span>
                 </label>
               </div>
@@ -696,7 +703,7 @@ export default function CartPage() {
               <button 
                 onClick={handleCheckout}
                 disabled={isCheckoutLoading}
-                className="w-full bg-black text-white font-bold py-3 rounded-md hover:bg-gray-900 transition-colors flex items-center justify-center gap-2 shadow-sm disabled:opacity-70"
+                className="w-full bg-primary text-white font-bold py-3 rounded-md hover:bg-gray-900 transition-colors flex items-center justify-center gap-2 shadow-sm disabled:opacity-70"
               >
                 {isCheckoutLoading ? (
                   <Loader2 className="animate-spin" size={18} />

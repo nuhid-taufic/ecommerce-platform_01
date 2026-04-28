@@ -95,9 +95,60 @@ const updateOrderStatus = async (req, res) => {
   }
 };
 
+const createManualOrder = async (req, res) => {
+  try {
+    const { customerEmail, items, shippingInfo, paymentMethod, orderNote } = req.body;
+
+    // Basic validation
+    if (!items || items.length === 0) {
+      return res.status(400).json({ success: false, message: "No items provided" });
+    }
+    if (!shippingInfo || !shippingInfo.phone || !shippingInfo.name) {
+      return res.status(400).json({ success: false, message: "Customer name and phone are required" });
+    }
+
+    // Calculate total amount
+    const totalAmount = items.reduce((acc, item) => acc + item.price * item.quantity, 0);
+
+    // Generate unique transaction and order IDs
+    const tran_id = `MANUAL-${Date.now()}`;
+    const orderNumber = `ORD-${Math.floor(100000 + Math.random() * 900000)}`;
+
+    const newOrder = new Order({
+      tran_id,
+      orderNumber,
+      customerEmail,
+      items,
+      totalAmount,
+      shippingInfo,
+      paymentMethod: paymentMethod || "Manual",
+      paymentStatus: "Paid", // Assuming manual orders are already paid or handled offline
+      orderStatus: "Processing", // Start at processing for manual orders
+      orderNote,
+    });
+
+    await newOrder.save();
+
+    // Reduce stock for each product
+    for (const item of items) {
+      if (item.product) {
+        await Product.findByIdAndUpdate(item.product, {
+          $inc: { stock: -item.quantity },
+        });
+      }
+    }
+
+    res.status(201).json({ success: true, message: "Manual order created", order: newOrder });
+  } catch (error) {
+    console.error("Manual Order Error:", error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
 module.exports = {
   getUserOrders,
   getAllOrders,
   updateOrderTracking,
   updateOrderStatus,
+  createManualOrder,
 };

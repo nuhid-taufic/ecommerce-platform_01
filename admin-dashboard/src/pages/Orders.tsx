@@ -14,13 +14,18 @@ import {
   Ban,
   ArrowRight,
   Search,
+  Plus,
+  Trash2,
+  CreditCard,
 } from "lucide-react";
 import toast from "react-hot-toast";
+import { bdDistricts, bdUpazilas } from "../utils/bd-data";
 
 type OrderStatus = "Pending" | "Processing" | "Shipped" | "Delivered" | "Cancelled";
 
 export default function Orders() {
   const [orders, setOrders] = useState<any[]>([]);
+  const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<OrderStatus>("Pending");
   const [searchQuery, setSearchQuery] = useState("");
@@ -29,6 +34,29 @@ export default function Orders() {
   const [selectedOrder, setSelectedOrder] = useState<any>(null);
   const [isUpdating, setIsUpdating] = useState(false);
   const [courierName, setCourierName] = useState("");
+  const [isManualModalOpen, setIsManualModalOpen] = useState(false);
+
+  // Manual Order Form State
+  const [manualForm, setManualForm] = useState({
+    customerEmail: "",
+    name: "",
+    phone: "",
+    addressLine: "",
+    district: "Dhaka",
+    thana: "",
+    paymentMethod: "Manual",
+    orderNote: "",
+  });
+  const [manualItems, setManualItems] = useState<any[]>([]);
+
+  // Computed thanas based on selected district
+  const upazilas = bdUpazilas[manualForm.district] || [];
+
+  useEffect(() => {
+    if (upazilas.length > 0 && !upazilas.includes(manualForm.thana)) {
+      setManualForm(prev => ({ ...prev, thana: upazilas[0] }));
+    }
+  }, [manualForm.district, upazilas]);
 
   const fetchOrders = async () => {
     try {
@@ -44,8 +72,21 @@ export default function Orders() {
     }
   };
 
+  const fetchProducts = async () => {
+    try {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/products`);
+      const data = await res.json();
+      if (data.success) {
+        setProducts(data.products || []);
+      }
+    } catch (error) {
+      console.error("Failed to fetch products");
+    }
+  };
+
   useEffect(() => {
     fetchOrders();
+    fetchProducts();
   }, []);
 
   const handleStatusUpdate = async (id: string, status: OrderStatus, cName?: string) => {
@@ -85,6 +126,83 @@ export default function Orders() {
     }
   };
 
+  const handleCreateManualOrder = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (manualItems.length === 0) return toast.error("Please add at least one product");
+
+    const payload = {
+      customerEmail: manualForm.customerEmail || `offline-${Date.now()}@example.com`,
+      shippingInfo: {
+        name: manualForm.name,
+        phone: manualForm.phone,
+        addressLine: manualForm.addressLine,
+        district: manualForm.district,
+        thana: manualForm.thana,
+      },
+      items: manualItems.map(item => ({
+        product: item._id,
+        name: item.name,
+        quantity: item.quantity,
+        price: item.price,
+        image: item.image,
+      })),
+      paymentMethod: manualForm.paymentMethod,
+      orderNote: manualForm.orderNote,
+    };
+
+    const loadingToast = toast.loading("Creating manual order...");
+    setIsUpdating(true);
+
+    try {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/orders/manual-order`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      const data = await res.json();
+      toast.dismiss(loadingToast);
+
+      if (data.success) {
+        toast.success("Manual order created successfully!");
+        setIsManualModalOpen(false);
+        setManualItems([]);
+        setManualForm({
+          customerEmail: "",
+          name: "",
+          phone: "",
+          addressLine: "",
+          district: "Dhaka",
+          thana: "",
+          paymentMethod: "Manual",
+          orderNote: "",
+        });
+        fetchOrders();
+      } else {
+        toast.error(data.message || "Failed to create order");
+      }
+    } catch (error) {
+      console.error("Manual Order Request Failed:", error);
+      toast.error("Network error! Please check if backend is running.");
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
+  const addItemToManualOrder = (productId: string) => {
+    const product = products.find(p => p._id === productId);
+    if (!product) return;
+
+    const existing = manualItems.find(item => item._id === productId);
+    if (existing) {
+      setManualItems(manualItems.map(item => 
+        item._id === productId ? { ...item, quantity: item.quantity + 1 } : item
+      ));
+    } else {
+      setManualItems([...manualItems, { ...product, quantity: 1 }]);
+    }
+  };
+
   const filteredOrders = orders.filter((order) => {
     const statusMatch = order.orderStatus === activeTab;
     const searchMatch = 
@@ -115,9 +233,17 @@ export default function Orders() {
 
   return (
     <div className="p-8 bg-slate-50 min-h-screen">
-      <div className="mb-8">
-        <h1 className="text-3xl font-black text-slate-900 tracking-tight">Order Management</h1>
-        <p className="text-slate-500 mt-1 font-medium">Fulfill your customer orders through a structured workflow.</p>
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+        <div>
+          <h1 className="text-3xl font-black text-slate-900 tracking-tight">Order Management</h1>
+          <p className="text-slate-500 mt-1 font-medium">Fulfill your customer orders through a structured workflow.</p>
+        </div>
+        <button
+          onClick={() => setIsManualModalOpen(true)}
+          className="flex items-center gap-2 bg-blue-600 text-white px-6 py-3 rounded-2xl font-black text-sm uppercase tracking-wider hover:bg-blue-700 transition-all shadow-lg shadow-blue-200 active:scale-95"
+        >
+          <Plus size={20} /> Create Manual Order
+        </button>
       </div>
 
       {/* Tabs */}
@@ -173,7 +299,14 @@ export default function Orders() {
                   </div>
                   <div>
                     <h3 className="font-black text-slate-900 text-lg">#{order.orderNumber || order.tran_id || order._id}</h3>
-                    <p className="text-slate-400 text-sm font-medium">{new Date(order.createdAt).toLocaleString()}</p>
+                    <div className="flex items-center gap-2 mt-0.5">
+                      <p className="text-slate-400 text-sm font-medium">{new Date(order.createdAt).toLocaleString()}</p>
+                      {order.transactionId && (
+                        <span className="bg-blue-50 text-blue-600 px-2 py-0.5 rounded text-[10px] font-black border border-blue-100">
+                          TXN: {order.transactionId}
+                        </span>
+                      )}
+                    </div>
                   </div>
                 </div>
 
@@ -257,6 +390,218 @@ export default function Orders() {
         </div>
       </div>
 
+      {/* Manual Order Modal */}
+      {isManualModalOpen && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md">
+          <div className="bg-white w-full max-w-5xl max-h-[90vh] overflow-hidden rounded-[40px] shadow-2xl relative animate-in fade-in zoom-in-95 duration-300 flex flex-col md:flex-row">
+            {/* Left: Product Selector */}
+            <div className="w-full md:w-2/5 bg-slate-50 border-r border-slate-100 p-8 overflow-y-auto no-scrollbar">
+              <div className="flex items-center justify-between mb-8">
+                <h2 className="text-xl font-black text-slate-900 tracking-tight uppercase">Select Products</h2>
+                <span className="bg-white px-3 py-1 rounded-full text-[10px] font-black text-slate-400 border border-slate-100">
+                  {products.length} Products
+                </span>
+              </div>
+              
+              <div className="space-y-3">
+                {products.map(p => (
+                  <button
+                    key={p._id}
+                    onClick={() => addItemToManualOrder(p._id)}
+                    className="w-full p-4 bg-white border border-slate-100 rounded-2xl flex items-center gap-4 hover:border-blue-300 hover:shadow-md transition-all group text-left"
+                  >
+                    <div className="h-14 w-12 rounded-xl bg-slate-100 overflow-hidden flex-shrink-0">
+                      <img src={p.image} className="h-full w-full object-cover" alt="" />
+                    </div>
+                    <div className="flex-1">
+                      <p className="font-bold text-slate-800 text-sm line-clamp-1">{p.name}</p>
+                      <p className="text-blue-600 font-black text-xs mt-0.5">৳{p.price}</p>
+                    </div>
+                    <div className="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center group-hover:bg-blue-600 group-hover:text-white transition-colors">
+                      <Plus size={16} />
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Right: Order Form */}
+            <div className="flex-1 p-10 overflow-y-auto no-scrollbar relative">
+              <button
+                onClick={() => setIsManualModalOpen(false)}
+                className="absolute top-8 right-8 p-3 bg-slate-100 rounded-full hover:bg-red-100 hover:text-red-600 transition-all"
+              >
+                <X size={24} />
+              </button>
+
+              <div className="mb-10">
+                <h2 className="text-2xl font-black text-slate-900 tracking-tight">Manual Order Entry</h2>
+                <p className="text-sm text-slate-400 font-medium mt-1">Manage orders from offline or other platforms.</p>
+              </div>
+
+              <form onSubmit={handleCreateManualOrder} className="space-y-8">
+                {/* Items Section */}
+                <div>
+                  <h3 className="text-xs font-black uppercase tracking-[0.2em] text-slate-400 mb-6">Order Items</h3>
+                  {manualItems.length === 0 ? (
+                    <div className="p-8 bg-slate-50 rounded-[32px] border border-dashed border-slate-200 text-center">
+                      <Package className="h-8 w-8 text-slate-200 mx-auto mb-2" />
+                      <p className="text-xs text-slate-400 font-bold uppercase tracking-widest">No items added yet</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      {manualItems.map((item, idx) => (
+                        <div key={idx} className="flex items-center gap-4 p-4 bg-white border border-slate-100 rounded-2xl group shadow-sm">
+                          <img src={item.image} className="w-12 h-14 object-cover bg-slate-50 rounded-xl" alt="" />
+                          <div className="flex-1">
+                            <p className="font-bold text-slate-800 text-sm">{item.name}</p>
+                            <p className="text-xs text-slate-400 font-bold mt-0.5">৳{item.price} × {item.quantity}</p>
+                          </div>
+                          <div className="flex items-center gap-3">
+                            <div className="flex items-center bg-slate-50 rounded-xl p-1 border border-slate-100">
+                              <button 
+                                type="button"
+                                onClick={() => setManualItems(manualItems.map((it, i) => i === idx ? { ...it, quantity: Math.max(1, it.quantity - 1) } : it))}
+                                className="w-8 h-8 flex items-center justify-center hover:bg-white rounded-lg transition-colors"
+                              >-</button>
+                              <span className="w-8 text-center font-black text-sm">{item.quantity}</span>
+                              <button 
+                                type="button"
+                                onClick={() => setManualItems(manualItems.map((it, i) => i === idx ? { ...it, quantity: it.quantity + 1 } : it))}
+                                className="w-8 h-8 flex items-center justify-center hover:bg-white rounded-lg transition-colors"
+                              >+</button>
+                            </div>
+                            <button 
+                              type="button"
+                              onClick={() => setManualItems(manualItems.filter((_, i) => i !== idx))}
+                              className="p-3 text-slate-300 hover:text-red-500 transition-colors"
+                            >
+                              <Trash2 size={18} />
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                      <div className="p-4 bg-slate-900 rounded-2xl flex justify-between items-center text-white">
+                        <span className="text-[10px] font-black uppercase tracking-widest text-white/50">Estimated Total</span>
+                        <span className="text-xl font-black tracking-tight">৳{manualItems.reduce((acc, it) => acc + (it.price * it.quantity), 0)}</span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                <div className="h-px bg-slate-100" />
+
+                {/* Customer Details */}
+                <div>
+                  <h3 className="text-xs font-black uppercase tracking-[0.2em] text-slate-400 mb-6">Customer Details</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="col-span-2">
+                      <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2 block">Full Name</label>
+                      <input 
+                        required
+                        value={manualForm.name}
+                        onChange={(e) => setManualForm({ ...manualForm, name: e.target.value })}
+                        className="w-full px-5 py-3.5 bg-slate-50 border border-slate-100 rounded-2xl outline-none focus:bg-white focus:ring-2 focus:ring-blue-500/20 font-bold text-slate-800 transition-all"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2 block">Phone Number</label>
+                      <input 
+                        required
+                        value={manualForm.phone}
+                        onChange={(e) => setManualForm({ ...manualForm, phone: e.target.value })}
+                        className="w-full px-5 py-3.5 bg-slate-50 border border-slate-100 rounded-2xl outline-none focus:bg-white focus:ring-2 focus:ring-blue-500/20 font-bold text-slate-800 transition-all"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2 block">Email (Optional)</label>
+                      <input 
+                        type="email"
+                        value={manualForm.customerEmail}
+                        onChange={(e) => setManualForm({ ...manualForm, customerEmail: e.target.value })}
+                        className="w-full px-5 py-3.5 bg-slate-50 border border-slate-100 rounded-2xl outline-none focus:bg-white focus:ring-2 focus:ring-blue-500/20 font-bold text-slate-800 transition-all"
+                      />
+                    </div>
+                    <div className="col-span-2">
+                      <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2 block">Full Address</label>
+                      <input 
+                        required
+                        value={manualForm.addressLine}
+                        onChange={(e) => setManualForm({ ...manualForm, addressLine: e.target.value })}
+                        className="w-full px-5 py-3.5 bg-slate-50 border border-slate-100 rounded-2xl outline-none focus:bg-white focus:ring-2 focus:ring-blue-500/20 font-bold text-slate-800 transition-all"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2 block">District</label>
+                      <select
+                        required
+                        value={manualForm.district}
+                        onChange={(e) => setManualForm({ ...manualForm, district: e.target.value })}
+                        className="w-full px-5 py-3.5 bg-slate-50 border border-slate-100 rounded-2xl outline-none focus:bg-white focus:ring-2 focus:ring-blue-500/20 font-bold text-slate-800 transition-all appearance-none cursor-pointer"
+                      >
+                        {bdDistricts.map(d => <option key={d} value={d}>{d}</option>)}
+                      </select>
+                    </div>
+                    <div>
+                      <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2 block">Area/Thana</label>
+                      <select
+                        required
+                        value={manualForm.thana}
+                        onChange={(e) => setManualForm({ ...manualForm, thana: e.target.value })}
+                        className="w-full px-5 py-3.5 bg-slate-50 border border-slate-100 rounded-2xl outline-none focus:bg-white focus:ring-2 focus:ring-blue-500/20 font-bold text-slate-800 transition-all appearance-none cursor-pointer"
+                      >
+                        {upazilas.map(t => <option key={t} value={t}>{t}</option>)}
+                      </select>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="h-px bg-slate-100" />
+
+                {/* Additional Info */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                  <div>
+                    <h3 className="text-xs font-black uppercase tracking-[0.2em] text-slate-400 mb-6 flex items-center gap-2">
+                      <CreditCard size={14} /> Payment Method
+                    </h3>
+                    <select
+                      value={manualForm.paymentMethod}
+                      onChange={(e) => setManualForm({ ...manualForm, paymentMethod: e.target.value })}
+                      className="w-full px-5 py-3.5 bg-slate-50 border border-slate-100 rounded-2xl outline-none focus:bg-white focus:ring-2 focus:ring-blue-500/20 font-bold text-slate-800 transition-all appearance-none cursor-pointer"
+                    >
+                      <option value="Manual">Cash/Manual Payment</option>
+                      <option value="bKash">bKash</option>
+                      <option value="Nagad">Nagad</option>
+                      <option value="Bank Transfer">Bank Transfer</option>
+                    </select>
+                  </div>
+                  <div>
+                    <h3 className="text-xs font-black uppercase tracking-[0.2em] text-slate-400 mb-6">Internal Note</h3>
+                    <textarea 
+                      rows={2}
+                      value={manualForm.orderNote}
+                      onChange={(e) => setManualForm({ ...manualForm, orderNote: e.target.value })}
+                      placeholder="Special instructions for this order..."
+                      className="w-full px-5 py-3.5 bg-slate-50 border border-slate-100 rounded-2xl outline-none focus:bg-white focus:ring-2 focus:ring-blue-500/20 font-bold text-slate-800 transition-all resize-none"
+                    />
+                  </div>
+                </div>
+
+                <div className="pt-6">
+                  <button
+                    type="submit"
+                    disabled={isUpdating}
+                    className="w-full bg-slate-900 text-white py-5 rounded-[24px] font-black uppercase tracking-widest hover:bg-slate-800 transition-all shadow-2xl shadow-slate-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {isUpdating ? "Processing Order..." : "Confirm Manual Order"}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Detail Modal */}
       {selectedOrder && (
         <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md">
@@ -313,6 +658,48 @@ export default function Orders() {
                       <p className="font-black text-slate-800">{selectedOrder.courierName}</p>
                     </div>
                   )}
+                </div>
+
+                {/* New Section: Transaction & Notes */}
+                <div className="bg-blue-50/50 p-8 rounded-[32px] border border-blue-100 md:col-span-2">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div>
+                      <h3 className="text-xs font-black uppercase tracking-[0.2em] text-blue-400 mb-3 flex items-center gap-2">
+                        <CreditCard size={14} /> Transaction Details
+                      </h3>
+                      <div className="space-y-3">
+                        <div>
+                          <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mb-1">Internal Reference</p>
+                          <p className="font-mono text-xs font-bold text-slate-700 bg-white px-3 py-1.5 rounded-lg border border-blue-100 w-max">
+                            {selectedOrder.tran_id}
+                          </p>
+                        </div>
+                        {selectedOrder.transactionId && (
+                          <div>
+                            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mb-1">Customer TXN ID ({selectedOrder.paymentMethod})</p>
+                            <p className="font-mono text-sm font-black text-blue-600 bg-blue-50 px-3 py-1.5 rounded-lg border border-blue-200 w-max">
+                              {selectedOrder.transactionId}
+                            </p>
+                          </div>
+                        )}
+                        {!selectedOrder.transactionId && (
+                          <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">
+                            Method: {selectedOrder.paymentMethod}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                    <div>
+                      <h3 className="text-xs font-black uppercase tracking-[0.2em] text-blue-400 mb-3 flex items-center gap-2">
+                        <Package size={14} /> Special Note
+                      </h3>
+                      <div className="bg-white p-4 rounded-2xl border border-blue-100 min-h-[80px]">
+                        <p className="text-slate-600 font-medium italic text-sm leading-relaxed">
+                          {selectedOrder.orderNote || "No special instructions provided by customer."}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
 

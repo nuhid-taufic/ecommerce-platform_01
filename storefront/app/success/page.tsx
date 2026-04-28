@@ -16,12 +16,12 @@ function SuccessContent() {
   }, [clearCart]);
 
   return (
-    <div className="min-h-screen bg-[#FAFAFA] font-sans text-[#111111] selection:bg-black selection:text-white flex flex-col">
+    <div className="min-h-screen bg-[#FAFAFA] font-sans text-[#111111] selection:bg-primary selection:text-white flex flex-col">
       {/* Minimal Navbar */}
       <nav className="py-6 border-b border-gray-200/50 bg-white absolute top-0 w-full z-10">
         <div className="max-w-7xl mx-auto px-6 lg:px-8 flex items-center justify-center">
           <Link href="/" className="flex items-center gap-2 group">
-            <div className="w-8 h-8 bg-black rounded-full flex items-center justify-center group-hover:scale-90 transition-transform">
+            <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center group-hover:scale-90 transition-transform">
               <div className="w-3 h-3 bg-white rounded-full"></div>
             </div>
             <span className="text-xl font-bold tracking-tighter">STUDIO.</span>
@@ -32,7 +32,7 @@ function SuccessContent() {
       <main className="flex-grow flex items-center justify-center px-6 lg:px-8 pt-24 pb-12">
         <div className="w-full max-w-lg text-center animate-in fade-in slide-in-from-bottom-8 duration-700">
           {/* Success Icon */}
-          <div className="w-24 h-24 bg-black rounded-full flex items-center justify-center mx-auto mb-8 shadow-2xl shadow-black/20">
+          <div className="w-24 h-24 bg-primary rounded-full flex items-center justify-center mx-auto mb-8 shadow-2xl shadow-black/20">
             <Check className="h-10 w-10 text-white stroke-[3]" />
           </div>
 
@@ -62,13 +62,13 @@ function SuccessContent() {
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
               href="/profile"
-              className="flex-1 bg-black text-white px-8 py-4 rounded-xl text-xs font-bold uppercase tracking-widest hover:bg-gray-800 transition-colors shadow-lg shadow-black/10 flex items-center justify-center gap-2"
+              className="flex-1 bg-primary text-white px-8 py-4 rounded-xl text-xs font-bold uppercase tracking-widest hover:opacity-90 transition-colors shadow-lg shadow-black/10 flex items-center justify-center gap-2"
             >
               Track Order
             </Link>
             <Link
               href="/shop"
-              className="flex-1 bg-white border border-gray-200 text-black px-8 py-4 rounded-xl text-xs font-bold uppercase tracking-widest hover:bg-gray-50 transition-colors flex items-center justify-center gap-2"
+              className="flex-1 bg-white border border-gray-200 text-secondary px-8 py-4 rounded-xl text-xs font-bold uppercase tracking-widest hover:bg-gray-50 transition-colors flex items-center justify-center gap-2"
             >
               Continue Shopping <ArrowRight className="h-4 w-4" />
             </Link>

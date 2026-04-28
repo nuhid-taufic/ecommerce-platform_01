@@ -92,7 +92,7 @@ export default function ProfilePage() {
             <div className="flex flex-col gap-1.5 p-4 bg-white border border-gray-100 rounded-3xl shadow-sm">
               {/* User Card */}
               <div className="flex items-center gap-4 p-5 mb-4 bg-gray-50 rounded-2xl">
-                <div className="w-14 h-14 rounded-full bg-black flex items-center justify-center text-white text-xl font-medium ring-4 ring-white shadow-sm shrink-0">
+                <div className="w-14 h-14 rounded-full bg-primary flex items-center justify-center text-white text-xl font-medium ring-4 ring-white shadow-sm shrink-0">
                   {user.name?.charAt(0).toUpperCase() || "U"}
                 </div>
                 <div className="overflow-hidden">
@@ -112,12 +112,12 @@ export default function ProfilePage() {
                     onClick={() => setActiveTab(menu.id)}
                     className={`w-full flex items-center justify-between group px-5 py-4 rounded-xl text-sm font-semibold transition-all ${
                       activeTab === menu.id
-                        ? "bg-black text-white shadow-xl shadow-black/10"
-                        : "text-gray-500 hover:bg-gray-50 hover:text-black"
+                        ? "bg-primary text-white shadow-xl shadow-black/10"
+                        : "text-gray-500 hover:bg-gray-50 hover:text-secondary"
                     }`}
                   >
                     <div className="flex items-center gap-3.5">
-                      <span className={activeTab === menu.id ? "text-white" : "text-gray-400 group-hover:text-black transition-colors"}>
+                      <span className={activeTab === menu.id ? "text-white" : "text-gray-400 group-hover:text-secondary transition-colors"}>
                         {React.cloneElement(menu.icon as React.ReactElement<any>, { size: 20, strokeWidth: 2 })}
                       </span>
                       {menu.label}
@@ -223,7 +223,7 @@ const Dashboard = ({ orders, loading }: { orders: any[]; loading: boolean }) => 
         {orders.length > 0 ? (
           <div className="space-y-4">
             {orders.slice(0, 5).map((order, idx) => (
-              <div key={idx} className="flex items-center justify-between bg-white p-6 rounded-2xl border border-gray-100 shadow-sm hover:border-black transition-all">
+              <div key={idx} className="flex items-center justify-between bg-white p-6 rounded-2xl border border-gray-100 shadow-sm hover:border-primary transition-all">
                 <div className="flex items-center gap-5">
                   <div className="w-12 h-12 bg-gray-50 rounded-full flex items-center justify-center text-sm font-bold">
                     #{order.orderNumber || order.tran_id || order._id}
@@ -277,7 +277,7 @@ const TraceOrder = ({ orders, loading }: { orders: any[]; loading: boolean }) =>
         const progressIndex = currentStepIndex !== -1 ? currentStepIndex : 0;
 
         return (
-          <div key={order._id} className="border border-gray-100 rounded-3xl p-8 transition-all hover:border-black/10 hover:shadow-lg bg-white">
+          <div key={order._id} className="border border-gray-100 rounded-3xl p-8 transition-all hover:border-primary/10 hover:shadow-lg bg-white">
             <div className="flex justify-between items-start mb-8">
               <div>
                 <p className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">Reference ID</p>
@@ -285,7 +285,7 @@ const TraceOrder = ({ orders, loading }: { orders: any[]; loading: boolean }) =>
               </div>
               <div className="text-right">
                 <p className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">Order Value</p>
-                <p className="text-lg font-bold text-black">৳{order.totalAmount?.toFixed(2)}</p>
+                <p className="text-lg font-bold text-secondary">৳{order.totalAmount?.toFixed(2)}</p>
               </div>
             </div>
             
@@ -307,18 +307,18 @@ const TraceOrder = ({ orders, loading }: { orders: any[]; loading: boolean }) =>
             ) : (
               <div className="pt-4">
                 <div className="flex justify-between mb-5">
-                  <p className="text-xs font-bold uppercase tracking-widest text-black">Current Status: {order.orderStatus}</p>
+                  <p className="text-xs font-bold uppercase tracking-widest text-secondary">Current Status: {order.orderStatus}</p>
                   <p className="text-xs font-bold uppercase tracking-widest text-gray-400">{Math.round((progressIndex / (trackingSteps.length - 1)) * 100)}% Completed</p>
                 </div>
                 <div className="relative h-2 bg-gray-100 rounded-full overflow-hidden">
                   <div
-                    className="absolute top-0 left-0 h-full bg-black transition-all duration-1000"
+                    className="absolute top-0 left-0 h-full bg-primary transition-all duration-1000"
                     style={{ width: `${(progressIndex / (trackingSteps.length - 1)) * 100}%` }}
                   ></div>
                 </div>
                 <div className="flex justify-between mt-5">
                   {trackingSteps.map((step, index) => (
-                    <span key={step} className={`text-[10px] font-bold uppercase tracking-tight ${index <= progressIndex ? "text-black" : "text-gray-300"}`}>
+                    <span key={step} className={`text-[10px] font-bold uppercase tracking-tight ${index <= progressIndex ? "text-secondary" : "text-gray-300"}`}>
                       {step}
                     </span>
                   ))}
@@ -403,7 +403,7 @@ const PromoCoupon = () => {
           <button
             onClick={handleVerify}
             disabled={loading}
-            className="bg-black text-white px-8 py-3 rounded-xl text-xs font-bold uppercase tracking-widest hover:bg-gray-800 transition-all disabled:opacity-50 shadow-lg shadow-black/5"
+            className="bg-primary text-white px-8 py-3 rounded-xl text-xs font-bold uppercase tracking-widest hover:opacity-90 transition-all disabled:opacity-50 shadow-lg shadow-black/5"
           >
             {loading ? "..." : "Verify Code"}
           </button>
@@ -412,7 +412,7 @@ const PromoCoupon = () => {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-8">
         {coupons.length > 0 ? coupons.map((c, idx) => (
-          <div key={idx} className="group relative border border-gray-100 rounded-3xl p-10 bg-white hover:border-black transition-all overflow-hidden flex flex-col justify-between min-h-[220px] shadow-sm">
+          <div key={idx} className="group relative border border-gray-100 rounded-3xl p-10 bg-white hover:border-primary transition-all overflow-hidden flex flex-col justify-between min-h-[220px] shadow-sm">
             <div className="absolute top-0 right-0 p-6 opacity-5 group-hover:opacity-10 transition-opacity">
               <Ticket size={64} />
             </div>
@@ -435,7 +435,7 @@ const PromoCoupon = () => {
                   navigator.clipboard.writeText(c.code);
                   toast.success("Copied to clipboard");
                 }}
-                className="text-xs font-bold uppercase tracking-widest bg-black text-white px-6 py-3 rounded-xl hover:bg-gray-800 transition-all shadow-md"
+                className="text-xs font-bold uppercase tracking-widest bg-primary text-white px-6 py-3 rounded-xl hover:opacity-90 transition-all shadow-md"
               >
                 Copy
               </button>
@@ -554,7 +554,7 @@ const AddressManage = ({ user, updateUser }: { user: any; updateUser: any }) => 
             setEditingIndex(null);
             setIsOpen(true);
           }}
-          className="flex items-center gap-3 text-sm font-bold uppercase tracking-widest bg-black text-white px-8 py-4 rounded-2xl hover:bg-gray-800 transition-all shadow-lg shadow-black/5"
+          className="flex items-center gap-3 text-sm font-bold uppercase tracking-widest bg-primary text-white px-8 py-4 rounded-2xl hover:opacity-90 transition-all shadow-lg shadow-black/5"
         >
           <Plus size={18} /> Add New Address
         </button>
@@ -568,10 +568,10 @@ const AddressManage = ({ user, updateUser }: { user: any; updateUser: any }) => 
           </div>
         ) : (
           addresses.map((addr: any, idx: number) => (
-            <div key={idx} className="group border border-gray-100 rounded-3xl p-8 relative bg-white hover:border-black transition-all shadow-sm">
+            <div key={idx} className="group border border-gray-100 rounded-3xl p-8 relative bg-white hover:border-primary transition-all shadow-sm">
               <div className="flex justify-between items-start mb-8">
                 <div className="flex items-center gap-3">
-                  <div className="p-3 bg-gray-50 rounded-xl group-hover:bg-black group-hover:text-white transition-colors">
+                  <div className="p-3 bg-gray-50 rounded-xl group-hover:bg-primary group-hover:text-white transition-colors">
                     <MapPin size={20} />
                   </div>
                   <span className="text-xs font-bold uppercase tracking-widest text-gray-400">
@@ -618,9 +618,9 @@ const AddressManage = ({ user, updateUser }: { user: any; updateUser: any }) => 
       </div>
 
       {isOpen && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-md z-[100] flex items-center justify-center p-4">
+        <div className="fixed inset-0 bg-primary/50 backdrop-blur-md z-[100] flex items-center justify-center p-4">
           <div className="bg-white rounded-[2rem] w-full max-w-xl p-12 relative animate-in zoom-in-95 duration-200">
-            <button onClick={() => setIsOpen(false)} className="absolute top-8 right-8 text-gray-400 hover:text-black">
+            <button onClick={() => setIsOpen(false)} className="absolute top-8 right-8 text-gray-400 hover:text-secondary">
               <X size={24} />
             </button>
             <div className="mb-10 text-center">
@@ -636,7 +636,7 @@ const AddressManage = ({ user, updateUser }: { user: any; updateUser: any }) => 
                     <button
                       key={type}
                       onClick={() => setFormData({...formData, type})}
-                      className={`flex-1 py-4 rounded-2xl border text-xs font-bold uppercase tracking-widest transition-all ${formData.type === type ? "border-black bg-black text-white shadow-lg shadow-black/10" : "border-gray-100 text-gray-400 hover:border-gray-300"}`}
+                      className={`flex-1 py-4 rounded-2xl border text-xs font-bold uppercase tracking-widest transition-all ${formData.type === type ? "border-primary bg-primary text-white shadow-lg shadow-black/10" : "border-gray-100 text-gray-400 hover:border-gray-300"}`}
                     >
                       {type}
                     </button>
@@ -649,7 +649,7 @@ const AddressManage = ({ user, updateUser }: { user: any; updateUser: any }) => 
                   type="text"
                   value={formData.addressLine}
                   onChange={e => setFormData({...formData, addressLine: e.target.value})}
-                  className="w-full border border-gray-100 bg-gray-50/50 rounded-2xl px-6 py-4 text-base focus:border-black outline-none transition-all"
+                  className="w-full border border-gray-100 bg-gray-50/50 rounded-2xl px-6 py-4 text-base focus:border-primary outline-none transition-all"
                   placeholder="Street name, House, Flat..."
                 />
               </div>
@@ -659,7 +659,7 @@ const AddressManage = ({ user, updateUser }: { user: any; updateUser: any }) => 
                   type="text"
                   value={formData.postalCode}
                   onChange={e => setFormData({...formData, postalCode: e.target.value})}
-                  className="w-full border border-gray-100 bg-gray-50/50 rounded-2xl px-6 py-4 text-base focus:border-black outline-none transition-all"
+                  className="w-full border border-gray-100 bg-gray-50/50 rounded-2xl px-6 py-4 text-base focus:border-primary outline-none transition-all"
                   placeholder="1209"
                 />
               </div>
@@ -669,7 +669,7 @@ const AddressManage = ({ user, updateUser }: { user: any; updateUser: any }) => 
                   <select
                     value={formData.district}
                     onChange={e => setFormData({...formData, district: e.target.value})}
-                    className="w-full border border-gray-100 bg-gray-50/50 rounded-2xl px-6 py-4 text-sm font-bold uppercase tracking-wider focus:border-black outline-none bg-white appearance-none cursor-pointer"
+                    className="w-full border border-gray-100 bg-gray-50/50 rounded-2xl px-6 py-4 text-sm font-bold uppercase tracking-wider focus:border-primary outline-none bg-white appearance-none cursor-pointer"
                   >
                     {districts.map(d => <option key={d} value={d}>{d}</option>)}
                   </select>
@@ -679,7 +679,7 @@ const AddressManage = ({ user, updateUser }: { user: any; updateUser: any }) => 
                   <select
                     value={formData.thana}
                     onChange={e => setFormData({...formData, thana: e.target.value})}
-                    className="w-full border border-gray-100 bg-gray-50/50 rounded-2xl px-6 py-4 text-sm font-bold uppercase tracking-wider focus:border-black outline-none bg-white appearance-none cursor-pointer"
+                    className="w-full border border-gray-100 bg-gray-50/50 rounded-2xl px-6 py-4 text-sm font-bold uppercase tracking-wider focus:border-primary outline-none bg-white appearance-none cursor-pointer"
                   >
                     {upazilas.map(t => <option key={t} value={t}>{t}</option>)}
                   </select>
@@ -688,7 +688,7 @@ const AddressManage = ({ user, updateUser }: { user: any; updateUser: any }) => 
               <button
                 onClick={handleSave}
                 disabled={loading}
-                className="w-full bg-black text-white py-5 rounded-[1.5rem] text-sm font-bold uppercase tracking-widest mt-6 hover:bg-gray-800 shadow-xl shadow-black/10 transition-all"
+                className="w-full bg-primary text-white py-5 rounded-[1.5rem] text-sm font-bold uppercase tracking-widest mt-6 hover:opacity-90 shadow-xl shadow-black/10 transition-all"
               >
                 {loading ? "Registering..." : "Confirm & Save Address"}
               </button>
@@ -703,7 +703,7 @@ const AddressManage = ({ user, updateUser }: { user: any; updateUser: any }) => 
 // 5. Payment
 const Payment = () => {
   return (
-    <div className="animate-in fade-in duration-300 min-h-[300px] flex items-center justify-center bg-black rounded-2xl text-white">
+    <div className="animate-in fade-in duration-300 min-h-[300px] flex items-center justify-center bg-primary rounded-2xl text-white">
       <div className="text-center">
         <CreditCard className="h-12 w-12 mx-auto mb-4 opacity-50" />
         <p className="text-lg font-medium tracking-widest uppercase text-gray-300">Payment methods</p>
@@ -802,7 +802,7 @@ const ManageProfile = ({ user, updateUser, logout }: { user: any; updateUser: an
         </div>
         <button
           onClick={() => setIsEditing(!isEditing)}
-          className={`flex items-center gap-3 text-sm font-bold uppercase tracking-widest px-8 py-4 rounded-2xl transition-all shadow-lg ${isEditing ? "bg-gray-100 text-black shadow-none" : "bg-black text-white hover:bg-gray-800 shadow-black/5"}`}
+          className={`flex items-center gap-3 text-sm font-bold uppercase tracking-widest px-8 py-4 rounded-2xl transition-all shadow-lg ${isEditing ? "bg-gray-100 text-secondary shadow-none" : "bg-primary text-white hover:opacity-90 shadow-black/5"}`}
         >
           {isEditing ? <X size={18} /> : <Edit2 size={18} />} {isEditing ? "Cancel Editing" : "Edit Profile"}
         </button>
@@ -820,7 +820,7 @@ const ManageProfile = ({ user, updateUser, logout }: { user: any; updateUser: an
                   type="text"
                   value={formData.name}
                   onChange={e => setFormData({...formData, name: e.target.value})}
-                  className="w-full border border-gray-100 bg-gray-50/50 rounded-2xl px-6 py-4 text-base focus:border-black outline-none transition-all"
+                  className="w-full border border-gray-100 bg-gray-50/50 rounded-2xl px-6 py-4 text-base focus:border-primary outline-none transition-all"
                 />
               ) : (
                 <p className="text-lg font-bold py-2">{user.name}</p>
@@ -839,7 +839,7 @@ const ManageProfile = ({ user, updateUser, logout }: { user: any; updateUser: an
                   type="text"
                   value={formData.mobile}
                   onChange={e => setFormData({...formData, mobile: e.target.value})}
-                  className="w-full border border-gray-100 bg-gray-50/50 rounded-2xl px-6 py-4 text-base focus:border-black outline-none transition-all"
+                  className="w-full border border-gray-100 bg-gray-50/50 rounded-2xl px-6 py-4 text-base focus:border-primary outline-none transition-all"
                 />
               ) : (
                 <p className="text-lg font-bold py-2">{user.mobile || "Not provided"}</p>
@@ -861,7 +861,7 @@ const ManageProfile = ({ user, updateUser, logout }: { user: any; updateUser: an
                     value={formData.currentPassword}
                     onChange={e => setFormData({...formData, currentPassword: e.target.value})}
                     placeholder="Verify current password"
-                    className="w-full border border-gray-100 bg-white rounded-2xl px-6 py-4 text-base focus:border-black outline-none transition-all"
+                    className="w-full border border-gray-100 bg-white rounded-2xl px-6 py-4 text-base focus:border-primary outline-none transition-all"
                   />
                 </div>
                 <div>
@@ -871,7 +871,7 @@ const ManageProfile = ({ user, updateUser, logout }: { user: any; updateUser: an
                     value={formData.newPassword}
                     onChange={e => setFormData({...formData, newPassword: e.target.value})}
                     placeholder="Minimum 6 characters"
-                    className="w-full border border-gray-100 bg-white rounded-2xl px-6 py-4 text-base focus:border-black outline-none transition-all"
+                    className="w-full border border-gray-100 bg-white rounded-2xl px-6 py-4 text-base focus:border-primary outline-none transition-all"
                   />
                 </div>
               </div>
@@ -882,7 +882,7 @@ const ManageProfile = ({ user, updateUser, logout }: { user: any; updateUser: an
                 <button
                   onClick={handleUpdate}
                   disabled={loading}
-                  className="w-full bg-black text-white py-5 rounded-[1.5rem] text-sm font-bold uppercase tracking-widest hover:bg-gray-800 shadow-xl shadow-black/10 transition-all disabled:opacity-50"
+                  className="w-full bg-primary text-white py-5 rounded-[1.5rem] text-sm font-bold uppercase tracking-widest hover:opacity-90 shadow-xl shadow-black/10 transition-all disabled:opacity-50"
                 >
                   {loading ? "Updating..." : "Save Profile Changes"}
                 </button>
@@ -906,14 +906,14 @@ const ManageProfile = ({ user, updateUser, logout }: { user: any; updateUser: an
 
       {/* Account Deletion Modal */}
       {showDeleteModal && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-xl z-[200] flex items-center justify-center p-4">
+        <div className="fixed inset-0 bg-primary/60 backdrop-blur-xl z-[200] flex items-center justify-center p-4">
           <div className="bg-white rounded-[2.5rem] w-full max-w-lg p-12 relative animate-in zoom-in-95 duration-300 shadow-2xl">
             <button 
               onClick={() => {
                 setShowDeleteModal(false);
                 setDelPassword("");
               }} 
-              className="absolute top-8 right-8 text-gray-400 hover:text-black transition-colors"
+              className="absolute top-8 right-8 text-gray-400 hover:text-secondary transition-colors"
             >
               <X size={24} />
             </button>
@@ -934,12 +934,12 @@ const ManageProfile = ({ user, updateUser, logout }: { user: any; updateUser: an
                     value={delPassword}
                     onChange={(e) => setDelPassword(e.target.value)}
                     placeholder="Enter your password"
-                    className="w-full border border-gray-100 bg-gray-50 rounded-2xl px-6 py-5 text-base focus:border-black outline-none transition-all"
+                    className="w-full border border-gray-100 bg-gray-50 rounded-2xl px-6 py-5 text-base focus:border-primary outline-none transition-all"
                   />
                   <button
                     onClick={handleVerifyBeforeDelete}
                     disabled={!delPassword || loading}
-                    className="w-full bg-black text-white py-5 rounded-2xl text-sm font-bold uppercase tracking-widest hover:bg-gray-800 transition-all shadow-xl shadow-black/5 disabled:opacity-50"
+                    className="w-full bg-primary text-white py-5 rounded-2xl text-sm font-bold uppercase tracking-widest hover:opacity-90 transition-all shadow-xl shadow-black/5 disabled:opacity-50"
                   >
                     Verify Password
                   </button>
@@ -967,7 +967,7 @@ const ManageProfile = ({ user, updateUser, logout }: { user: any; updateUser: an
                   </button>
                   <button
                     onClick={() => setDeleteStep("password")}
-                    className="text-xs font-bold uppercase tracking-widest text-gray-400 hover:text-black py-4 transition-colors"
+                    className="text-xs font-bold uppercase tracking-widest text-gray-400 hover:text-secondary py-4 transition-colors"
                   >
                     Go Back
                   </button>

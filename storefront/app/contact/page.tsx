@@ -5,7 +5,10 @@ import Link from "next/link";
 import { ChevronRight, ArrowRight, MapPin, Mail, Phone } from "lucide-react";
 import toast from "react-hot-toast";
 
+import { useSettingsStore } from "@/store/settingsStore";
+
 export default function ContactPage() {
+  const { settings } = useSettingsStore();
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -54,11 +57,11 @@ export default function ContactPage() {
     <div className="min-h-screen bg-[#FAFAFA] font-sans text-[#111111]">
       <div className="pt-16 pb-10 px-6 lg:px-8 max-w-7xl mx-auto">
         <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-gray-400 mb-6">
-          <Link href="/" className="hover:text-black transition-colors">
+          <Link href="/" className="hover:text-secondary transition-colors">
             Home
           </Link>
           <ChevronRight className="h-3 w-3" />
-          <span className="text-black">Contact</span>
+          <span className="text-secondary">Contact</span>
         </div>
       </div>
 
@@ -78,14 +81,10 @@ export default function ContactPage() {
           <div className="lg:col-span-4 space-y-12 pr-8">
             <div>
               <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-gray-900 mb-4">
-                <MapPin className="h-4 w-4" /> Studio Location
+                <MapPin className="h-4 w-4" /> {settings?.storeName || "Studio"} Location
               </div>
-              <p className="text-gray-500 font-light leading-relaxed">
-                124 Editorial Avenue
-                <br />
-                Design District, NY 10012
-                <br />
-                United States
+              <p className="text-gray-500 font-light leading-relaxed whitespace-pre-line">
+                {settings?.storeAddress || "124 Editorial Avenue\nDesign District, NY 10012\nUnited States"}
               </p>
             </div>
 
@@ -94,10 +93,10 @@ export default function ContactPage() {
                 <Mail className="h-4 w-4" /> General Inquiries
               </div>
               <a
-                href="mailto:hello@studio.com"
-                className="text-gray-500 font-light hover:text-black transition-colors"
+                href={`mailto:${settings?.contactEmail || "hello@studio.com"}`}
+                className="text-gray-500 font-light hover:text-secondary transition-colors"
               >
-                hello@studio.com
+                {settings?.contactEmail || "hello@studio.com"}
               </a>
             </div>
 
@@ -105,7 +104,7 @@ export default function ContactPage() {
               <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-gray-900 mb-4">
                 <Phone className="h-4 w-4" /> Phone Support
               </div>
-              <p className="text-gray-500 font-light mb-2">+1 (555) 123-4567</p>
+              <p className="text-gray-500 font-light mb-2">{settings?.contactPhone || "+1 (555) 123-4567"}</p>
               <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400">
                 Mon-Fri, 9am - 6pm EST
               </p>
@@ -125,10 +124,10 @@ export default function ContactPage() {
                       onChange={(e) =>
                         setFormData({ ...formData, firstName: e.target.value })
                       }
-                      className="w-full bg-transparent border-b border-gray-200 py-3 text-sm focus:outline-none focus:border-black transition-colors peer placeholder-transparent"
+                      className="w-full bg-transparent border-b border-gray-200 py-3 text-sm focus:outline-none focus:border-primary transition-colors peer placeholder-transparent"
                       placeholder="First Name"
                     />
-                    <label className="absolute left-0 -top-3.5 text-xs text-gray-400 font-medium transition-all peer-placeholder-shown:text-sm peer-placeholder-shown:text-gray-400 peer-placeholder-shown:top-3 peer-focus:-top-3.5 peer-focus:text-xs peer-focus:text-black">
+                    <label className="absolute left-0 -top-3.5 text-xs text-gray-400 font-medium transition-all peer-placeholder-shown:text-sm peer-placeholder-shown:text-gray-400 peer-placeholder-shown:top-3 peer-focus:-top-3.5 peer-focus:text-xs peer-focus:text-secondary">
                       First Name
                     </label>
                   </div>
@@ -140,10 +139,10 @@ export default function ContactPage() {
                       onChange={(e) =>
                         setFormData({ ...formData, lastName: e.target.value })
                       }
-                      className="w-full bg-transparent border-b border-gray-200 py-3 text-sm focus:outline-none focus:border-black transition-colors peer placeholder-transparent"
+                      className="w-full bg-transparent border-b border-gray-200 py-3 text-sm focus:outline-none focus:border-primary transition-colors peer placeholder-transparent"
                       placeholder="Last Name"
                     />
-                    <label className="absolute left-0 -top-3.5 text-xs text-gray-400 font-medium transition-all peer-placeholder-shown:text-sm peer-placeholder-shown:text-gray-400 peer-placeholder-shown:top-3 peer-focus:-top-3.5 peer-focus:text-xs peer-focus:text-black">
+                    <label className="absolute left-0 -top-3.5 text-xs text-gray-400 font-medium transition-all peer-placeholder-shown:text-sm peer-placeholder-shown:text-gray-400 peer-placeholder-shown:top-3 peer-focus:-top-3.5 peer-focus:text-xs peer-focus:text-secondary">
                       Last Name
                     </label>
                   </div>
@@ -157,10 +156,10 @@ export default function ContactPage() {
                     onChange={(e) =>
                       setFormData({ ...formData, email: e.target.value })
                     }
-                    className="w-full bg-transparent border-b border-gray-200 py-3 text-sm focus:outline-none focus:border-black transition-colors peer placeholder-transparent"
+                    className="w-full bg-transparent border-b border-gray-200 py-3 text-sm focus:outline-none focus:border-primary transition-colors peer placeholder-transparent"
                     placeholder="Email Address"
                   />
-                  <label className="absolute left-0 -top-3.5 text-xs text-gray-400 font-medium transition-all peer-placeholder-shown:text-sm peer-placeholder-shown:text-gray-400 peer-placeholder-shown:top-3 peer-focus:-top-3.5 peer-focus:text-xs peer-focus:text-black">
+                  <label className="absolute left-0 -top-3.5 text-xs text-gray-400 font-medium transition-all peer-placeholder-shown:text-sm peer-placeholder-shown:text-gray-400 peer-placeholder-shown:top-3 peer-focus:-top-3.5 peer-focus:text-xs peer-focus:text-secondary">
                     Email Address
                   </label>
                 </div>
@@ -172,10 +171,10 @@ export default function ContactPage() {
                     onChange={(e) =>
                       setFormData({ ...formData, subject: e.target.value })
                     }
-                    className="w-full bg-transparent border-b border-gray-200 py-3 text-sm focus:outline-none focus:border-black transition-colors peer placeholder-transparent"
+                    className="w-full bg-transparent border-b border-gray-200 py-3 text-sm focus:outline-none focus:border-primary transition-colors peer placeholder-transparent"
                     placeholder="Subject"
                   />
-                  <label className="absolute left-0 -top-3.5 text-xs text-gray-400 font-medium transition-all peer-placeholder-shown:text-sm peer-placeholder-shown:text-gray-400 peer-placeholder-shown:top-3 peer-focus:-top-3.5 peer-focus:text-xs peer-focus:text-black">
+                  <label className="absolute left-0 -top-3.5 text-xs text-gray-400 font-medium transition-all peer-placeholder-shown:text-sm peer-placeholder-shown:text-gray-400 peer-placeholder-shown:top-3 peer-focus:-top-3.5 peer-focus:text-xs peer-focus:text-secondary">
                     Subject
                   </label>
                 </div>
@@ -188,10 +187,10 @@ export default function ContactPage() {
                     onChange={(e) =>
                       setFormData({ ...formData, message: e.target.value })
                     }
-                    className="w-full bg-transparent border-b border-gray-200 py-3 text-sm focus:outline-none focus:border-black transition-colors resize-none peer placeholder-transparent"
+                    className="w-full bg-transparent border-b border-gray-200 py-3 text-sm focus:outline-none focus:border-primary transition-colors resize-none peer placeholder-transparent"
                     placeholder="Your Message"
                   ></textarea>
-                  <label className="absolute left-0 -top-3.5 text-xs text-gray-400 font-medium transition-all peer-placeholder-shown:text-sm peer-placeholder-shown:text-gray-400 peer-placeholder-shown:top-4 peer-focus:-top-3.5 peer-focus:text-xs peer-focus:text-black">
+                  <label className="absolute left-0 -top-3.5 text-xs text-gray-400 font-medium transition-all peer-placeholder-shown:text-sm peer-placeholder-shown:text-gray-400 peer-placeholder-shown:top-4 peer-focus:-top-3.5 peer-focus:text-xs peer-focus:text-secondary">
                     Your Message
                   </label>
                 </div>
@@ -200,7 +199,7 @@ export default function ContactPage() {
                   <button
                     type="submit"
                     disabled={loading}
-                    className="bg-black text-white px-8 py-4 rounded-full text-xs font-bold uppercase tracking-widest flex items-center gap-3 hover:bg-gray-800 transition-all disabled:opacity-50"
+                    className="bg-primary text-white px-8 py-4 rounded-full text-xs font-bold uppercase tracking-widest flex items-center gap-3 hover:opacity-90 transition-all disabled:opacity-50"
                   >
                     {loading ? "Sending..." : "Send Message"}
                     {!loading && <ArrowRight className="h-4 w-4" />}

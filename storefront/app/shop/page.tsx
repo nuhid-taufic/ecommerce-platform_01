@@ -191,14 +191,14 @@ function ShopContent() {
   };
 
   return (
-    <div className="min-h-screen bg-[#FAFAFA] font-sans text-[#111111] selection:bg-black selection:text-white">
+    <div className="min-h-screen bg-[#FAFAFA] font-sans text-[#111111] selection:bg-primary selection:text-white">
       <div className="pt-16 pb-10 px-6 lg:px-8 max-w-7xl mx-auto">
         <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-gray-400 mb-6">
-          <Link href="/" className="hover:text-black transition-colors">
+          <Link href="/" className="hover:text-secondary transition-colors">
             Home
           </Link>
           <ChevronRight className="h-3 w-3" />
-          <span className="text-black">Collection</span>
+          <span className="text-secondary">Collection</span>
         </div>
         <h1 className="text-4xl sm:text-5xl font-medium tracking-tight">
           The Collection.
@@ -222,7 +222,7 @@ function ShopContent() {
           <div className="relative" ref={mobileSortDropdownRef}>
             <button
               onClick={() => setIsSortDropdownOpen(!isSortDropdownOpen)}
-              className="w-full flex items-center justify-between text-sm font-medium text-black bg-white border border-gray-200 rounded-xl px-4 py-3 shadow-sm"
+              className="w-full flex items-center justify-between text-sm font-medium text-secondary bg-white border border-gray-200 rounded-xl px-4 py-3 shadow-sm"
             >
               <span className="flex items-center gap-2">
                 <span className="text-gray-400 uppercase text-[10px] tracking-widest font-bold">
@@ -250,7 +250,7 @@ function ShopContent() {
                       setSortBy(option);
                       setIsSortDropdownOpen(false);
                     }}
-                    className={`w-full text-left px-5 py-3 text-sm transition-colors ${sortBy === option ? "bg-black text-white font-bold" : "text-gray-600 hover:bg-gray-50"}`}
+                    className={`w-full text-left px-5 py-3 text-sm transition-colors ${sortBy === option ? "bg-primary text-white font-bold" : "text-gray-600 hover:bg-gray-50"}`}
                   >
                     {option}
                   </button>
@@ -319,7 +319,7 @@ function ShopContent() {
                     className="flex items-center gap-3 cursor-pointer group"
                   >
                     <div
-                      className={`w-4 h-4 border flex items-center justify-center transition-colors ${selectedCategory === category ? "border-black bg-black" : "border-gray-300 group-hover:border-black"}`}
+                      className={`w-4 h-4 border flex items-center justify-center transition-colors ${selectedCategory === category ? "border-primary bg-primary" : "border-gray-300 group-hover:border-primary"}`}
                     >
                       {selectedCategory === category && (
                         <div className="w-1.5 h-1.5 bg-white"></div>
@@ -333,7 +333,7 @@ function ShopContent() {
                       onChange={() => setSelectedCategory(category)}
                     />
                     <span
-                      className={`text-sm transition-colors ${selectedCategory === category ? "font-medium text-black" : "text-gray-500 group-hover:text-black"}`}
+                      className={`text-sm transition-colors ${selectedCategory === category ? "font-medium text-secondary" : "text-gray-500 group-hover:text-secondary"}`}
                     >
                       {category}
                     </span>
@@ -359,7 +359,7 @@ function ShopContent() {
 
             <button
               onClick={clearFilters}
-              className="text-xs font-bold uppercase tracking-widest border-b border-black pb-0.5"
+              className="text-xs font-bold uppercase tracking-widest border-b border-primary pb-0.5"
             >
               Clear Filters
             </button>
@@ -376,7 +376,7 @@ function ShopContent() {
             <div className="relative" ref={desktopSortDropdownRef}>
               <button
                 onClick={() => setIsSortDropdownOpen(!isSortDropdownOpen)}
-                className="flex items-center gap-2 font-medium text-black hover:opacity-70 transition-opacity"
+                className="flex items-center gap-2 font-medium text-secondary hover:opacity-70 transition-opacity"
               >
                 <span className="text-gray-400 uppercase text-[10px] tracking-widest font-bold">
                   Sort By:
@@ -402,7 +402,7 @@ function ShopContent() {
                         setSortBy(option);
                         setIsSortDropdownOpen(false);
                       }}
-                      className={`w-full text-left px-5 py-3 text-sm transition-colors ${sortBy === option ? "bg-black text-white font-bold" : "text-gray-600 hover:bg-gray-50"}`}
+                      className={`w-full text-left px-5 py-3 text-sm transition-colors ${sortBy === option ? "bg-primary text-white font-bold" : "text-gray-600 hover:bg-gray-50"}`}
                     >
                       {option}
                     </button>
@@ -464,7 +464,7 @@ function ShopContent() {
                             </span>
                           )}
                           <p
-                            className={`text-sm sm:text-base font-black tracking-tight ${product.isFlashSale ? "text-red-500" : "text-black"}`}
+                            className={`text-sm sm:text-base font-black tracking-tight ${product.isFlashSale ? "text-red-500" : "text-secondary"}`}
                           >
                             ৳{product.price}
                           </p>
@@ -481,7 +481,7 @@ function ShopContent() {
                         addToCart({ ...product, quantity: 1 });
                         toast.success("Added to bag!");
                       }}
-                      className="h-9 w-9 rounded-full bg-white border border-gray-200 shadow-sm flex items-center justify-center text-gray-900 hover:bg-black hover:border-black hover:text-white transition-all shrink-0"
+                      className="h-9 w-9 rounded-full bg-white border border-gray-200 shadow-sm flex items-center justify-center text-gray-900 hover:bg-primary hover:border-primary hover:text-white transition-all shrink-0"
                       title="Add to Cart"
                     >
                       <ShoppingBag className="h-[18px] w-[18px]" />
