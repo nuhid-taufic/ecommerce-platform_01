@@ -14,10 +14,12 @@ import {
 } from "lucide-react";
 import { useAuthStore } from "@/store/authStore";
 import { useCartStore } from "@/store/cartStore";
+import { useSettingsStore } from "@/store/settingsStore";
 
 export default function Navbar() {
   const { user, login } = useAuthStore();
   const { items } = useCartStore();
+  const { settings, fetchSettings } = useSettingsStore();
   const cartItems = items || [];
   const pathname = usePathname();
   const [isClient, setIsClient] = useState(false);
@@ -43,6 +45,7 @@ export default function Navbar() {
       }
     };
     fetchCategories();
+    fetchSettings();
   }, []);
 
   useEffect(() => {
@@ -126,7 +129,7 @@ export default function Navbar() {
         <div className="flex items-center gap-4 shrink-0">
           <button
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className="md:hidden text-black hover:opacity-70 transition-opacity"
+            className="md:hidden text-secondary hover:opacity-70 transition-opacity"
           >
             {isMobileMenuOpen ? (
               <X className="h-6 w-6" />
@@ -135,10 +138,20 @@ export default function Navbar() {
             )}
           </button>
           <Link href="/" className="flex items-center gap-2 group">
-            <div className="w-8 h-8 bg-black rounded-full flex items-center justify-center group-hover:scale-90 transition-transform">
-              <div className="w-3 h-3 bg-white rounded-full"></div>
-            </div>
-            <span className="text-xl font-bold tracking-tighter">STUDIO.</span>
+            {settings?.logoUrl && !settings.logoUrl.startsWith("blob:") ? (
+              <img 
+                src={settings.logoUrl} 
+                alt={settings.storeName || "Logo"} 
+                className="h-8 w-auto object-contain transition-transform group-hover:scale-105" 
+              />
+            ) : (
+              <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center group-hover:scale-90 transition-transform">
+                <div className="w-3 h-3 bg-white rounded-full"></div>
+              </div>
+            )}
+            <span className="text-xl font-bold tracking-tighter uppercase">
+              {settings?.storeName || "STUDIO."}
+            </span>
           </Link>
         </div>
 
@@ -154,15 +167,15 @@ export default function Navbar() {
                   new URLSearchParams(
                     typeof window !== "undefined" ? window.location.search : "",
                   ).get("category") === cat
-                    ? "text-black scale-110"
-                    : "text-gray-400 hover:text-black hover:scale-105"
+                    ? "text-secondary scale-110"
+                    : "text-gray-400 hover:text-secondary hover:scale-105"
                 }`}
               >
                 {cat}
               </Link>
             ))}
             {categories.length === 0 && (
-              <Link href="/shop" className="text-gray-400 hover:text-black">
+              <Link href="/shop" className="text-gray-400 hover:text-secondary">
                 Shop All
               </Link>
             )}
@@ -191,7 +204,7 @@ export default function Navbar() {
                 placeholder="Ask AI..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full bg-transparent border-b border-black py-1 px-2 text-sm outline-none placeholder:text-gray-400 text-black font-medium"
+                className="w-full bg-transparent border-b border-primary py-1 px-2 text-sm outline-none placeholder:text-gray-400 text-secondary font-medium"
                 autoComplete="off"
               />
             </div>
@@ -248,7 +261,7 @@ export default function Navbar() {
                               )}
                             </div>
                             <div>
-                              <h4 className="text-sm font-medium text-black group-hover:text-gray-600 transition-colors line-clamp-1">
+                              <h4 className="text-sm font-medium text-secondary group-hover:text-gray-600 transition-colors line-clamp-1">
                                 {product.name}
                               </h4>
                               <p className="text-[10px] text-gray-400 capitalize">
@@ -291,7 +304,7 @@ export default function Navbar() {
             <ShoppingBag className="h-5 w-5 stroke-[1.5]" />
             <span className="hidden sm:inline">Cart</span>
             {cartItems.length > 0 && (
-              <span className="absolute -top-2 -right-2 bg-red-500 text-white text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center">
+              <span className="absolute -top-2 -right-2 bg-primary text-white text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center">
                 {cartItems.length}
               </span>
             )}
@@ -301,7 +314,7 @@ export default function Navbar() {
           {user ? (
             <Link
               href="/profile"
-              className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-black hover:text-gray-500 transition-colors"
+              className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-secondary hover:text-gray-500 transition-colors"
             >
               <User className="h-5 w-5 stroke-[1.5]" />
               <span className="hidden sm:inline">
@@ -312,7 +325,7 @@ export default function Navbar() {
             <Link
               href="/login"
               onClick={handleLoginClick}
-              className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-gray-500 hover:text-black transition-colors"
+              className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-gray-500 hover:text-secondary transition-colors"
             >
               <User className="h-5 w-5 stroke-[1.5]" />
               <span className="hidden sm:inline">Login</span>
@@ -330,7 +343,7 @@ export default function Navbar() {
               key={cat}
               href={`/shop?category=${encodeURIComponent(cat)}`}
               onClick={() => setIsMobileMenuOpen(false)}
-              className="text-lg font-bold uppercase tracking-tight text-black hover:text-gray-500"
+              className="text-lg font-bold uppercase tracking-tight text-secondary hover:text-gray-500"
             >
               {cat}
             </Link>

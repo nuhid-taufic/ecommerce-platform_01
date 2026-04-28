@@ -51,10 +51,11 @@ const getCustomerDetails = async (req, res) => {
     orders.forEach((order) => {
       const mappedOrder = {
         _id: order._id,
+        orderNumber: order.orderNumber,
         date: order.createdAt.toISOString().split("T")[0],
         status: order.orderStatus || "Processing",
         total: order.totalAmount,
-        products: order.products.map((p) => p.name),
+        products: order.items.map((p) => p.name),
         refundMsg: order.refundMessage || "",
       };
 
@@ -67,7 +68,7 @@ const getCustomerDetails = async (req, res) => {
         currentOrders.push(mappedOrder);
       }
 
-      order.products.forEach((p) => {
+      order.items.forEach((p) => {
         if (productCount[p.name]) {
           productCount[p.name] += p.quantity;
         } else {
@@ -79,15 +80,24 @@ const getCustomerDetails = async (req, res) => {
     const topProducts = Object.keys(productCount)
       .map((name) => ({ name, count: productCount[name] }))
       .sort((a, b) => b.count - a.count)
-      .slice(0, 3);
+      .slice(0, 5);
 
     res.status(200).json({
       success: true,
       details: {
         registrationDate: customer.createdAt.toISOString().split("T")[0],
+        customer: {
+          ...customer.toObject(),
+          password: null,
+        },
         currentOrders,
         previousOrders,
         topProducts,
+        stats: {
+          totalOrders: orders.length,
+          totalSpent: orders.reduce((sum, o) => sum + o.totalAmount, 0),
+          avgOrderValue: orders.length > 0 ? (orders.reduce((sum, o) => sum + o.totalAmount, 0) / orders.length).toFixed(2) : 0,
+        }
       },
     });
   } catch (error) {

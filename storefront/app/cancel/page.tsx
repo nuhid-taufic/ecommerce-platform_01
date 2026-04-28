@@ -6,12 +6,12 @@ import { X, ArrowLeft, ShoppingBag } from "lucide-react";
 
 export default function CancelPage() {
   return (
-    <div className="min-h-screen bg-[#FAFAFA] font-sans text-[#111111] selection:bg-black selection:text-white flex flex-col">
+    <div className="min-h-screen bg-[#FAFAFA] font-sans text-[#111111] selection:bg-primary selection:text-white flex flex-col">
       {/* Minimal Navbar */}
       <nav className="py-6 border-b border-gray-200/50 bg-white absolute top-0 w-full z-10">
         <div className="max-w-7xl mx-auto px-6 lg:px-8 flex items-center justify-center">
           <Link href="/" className="flex items-center gap-2 group">
-            <div className="w-8 h-8 bg-black rounded-full flex items-center justify-center group-hover:scale-90 transition-transform">
+            <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center group-hover:scale-90 transition-transform">
               <div className="w-3 h-3 bg-white rounded-full"></div>
             </div>
             <span className="text-xl font-bold tracking-tighter">STUDIO.</span>
@@ -37,13 +37,13 @@ export default function CancelPage() {
           <div className="flex flex-col gap-4">
             <Link
               href="/cart"
-              className="w-full bg-black text-white px-8 py-4 rounded-xl text-xs font-bold uppercase tracking-widest hover:bg-gray-800 transition-colors shadow-lg shadow-black/10 flex items-center justify-center gap-2"
+              className="w-full bg-primary text-white px-8 py-4 rounded-xl text-xs font-bold uppercase tracking-widest hover:opacity-90 transition-colors shadow-lg shadow-black/10 flex items-center justify-center gap-2"
             >
               <ShoppingBag className="h-4 w-4" /> Return to Bag
             </Link>
             <Link
               href="/shop"
-              className="w-full bg-transparent text-gray-500 hover:text-black py-4 text-xs font-bold uppercase tracking-widest transition-colors flex items-center justify-center gap-2"
+              className="w-full bg-transparent text-gray-500 hover:text-secondary py-4 text-xs font-bold uppercase tracking-widest transition-colors flex items-center justify-center gap-2"
             >
               <ArrowLeft className="h-4 w-4" /> Back to Store
             </Link>

@@ -7,11 +7,11 @@ export default function PrivacyPolicyPage() {
     <div className="min-h-screen bg-[#FAFAFA] font-sans text-[#111111] py-20">
       <div className="max-w-3xl mx-auto px-6 lg:px-8">
         <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-10">
-          <Link href="/" className="hover:text-black transition-colors">
+          <Link href="/" className="hover:text-secondary transition-colors">
             Home
           </Link>
           <ChevronRight className="h-3 w-3" />
-          <span className="text-black">Privacy Policy</span>
+          <span className="text-secondary">Privacy Policy</span>
         </div>
 
         <h1 className="text-4xl sm:text-5xl font-medium tracking-tight mb-4">
@@ -23,7 +23,7 @@ export default function PrivacyPolicyPage() {
 
         <div className="space-y-8 text-gray-600 font-light leading-relaxed">
           <section>
-            <h2 className="text-xl font-medium text-black mb-3">
+            <h2 className="text-xl font-medium text-secondary mb-3">
               1. Information We Collect
             </h2>
             <p>
@@ -37,7 +37,7 @@ export default function PrivacyPolicyPage() {
           </section>
 
           <section>
-            <h2 className="text-xl font-medium text-black mb-3">
+            <h2 className="text-xl font-medium text-secondary mb-3">
               2. How We Use Your Information
             </h2>
             <p>
@@ -51,7 +51,7 @@ export default function PrivacyPolicyPage() {
           </section>
 
           <section>
-            <h2 className="text-xl font-medium text-black mb-3">
+            <h2 className="text-xl font-medium text-secondary mb-3">
               3. Sharing of Information
             </h2>
             <p>
@@ -65,7 +65,7 @@ export default function PrivacyPolicyPage() {
           </section>
 
           <section>
-            <h2 className="text-xl font-medium text-black mb-3">4. Security</h2>
+            <h2 className="text-xl font-medium text-secondary mb-3">4. Security</h2>
             <p>
               We take reasonable measures to help protect information about you
               from loss, theft, misuse and unauthorized access, disclosure,

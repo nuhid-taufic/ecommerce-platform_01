@@ -18,8 +18,6 @@ import FlashSales from "./pages/FlashSales";
 import Helpdesk from "./pages/Helpdesk";
 import Staff from "./pages/Staff";
 import Media from "./pages/Media";
-import Recommendations from "./pages/Recommendations";
-import Shipping from "./pages/Shipping";
 import HeroSlider from "./pages/hero-slider";
 import toast from "react-hot-toast";
 
@@ -150,8 +148,6 @@ export default function App() {
           <Route path="/helpdesk" element={<Helpdesk />} />
           <Route path="/staff" element={<Staff />} />
           <Route path="/media" element={<Media />} />
-          <Route path="/recommendations" element={<Recommendations />} />
-          <Route path="/shipping" element={<Shipping />} />
           <Route path="/hero-slider" element={<HeroSlider />} />
           <Route path="/journal" element={<Journal />} />
           <Route path="/newsletter" element={<Newsletter />} />

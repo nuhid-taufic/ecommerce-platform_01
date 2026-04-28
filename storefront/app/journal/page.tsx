@@ -66,7 +66,7 @@ export default function JournalPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#FAFAFA] font-sans text-[#111111] selection:bg-black selection:text-white flex flex-col">
+    <div className="min-h-screen bg-[#FAFAFA] font-sans text-[#111111] selection:bg-primary selection:text-white flex flex-col">
       <Toaster
         position="top-right"
         toastOptions={{
@@ -90,7 +90,7 @@ export default function JournalPage() {
         {/* Content */}
         {loading ? (
           <div className="py-20 flex justify-center">
-            <div className="w-8 h-8 border-4 border-black border-t-transparent rounded-full animate-spin"></div>
+            <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
           </div>
         ) : articles.length === 0 ? (
           <div className="py-20 text-center">
@@ -114,14 +114,14 @@ export default function JournalPage() {
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000 ease-out"
                     />
                     {featuredArticle.isFeatured && (
-                      <div className="absolute top-6 left-6 bg-white/90 backdrop-blur px-4 py-2 rounded-full text-[10px] font-bold uppercase tracking-widest text-black">
+                      <div className="absolute top-6 left-6 bg-white/90 backdrop-blur px-4 py-2 rounded-full text-[10px] font-bold uppercase tracking-widest text-secondary">
                         Featured
                       </div>
                     )}
                   </div>
                   <div className="w-full lg:w-1/3">
                     <div className="flex items-center gap-3 text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-4">
-                      <span className="text-black">
+                      <span className="text-secondary">
                         {featuredArticle.category}
                       </span>
                       <span>•</span>
@@ -138,7 +138,7 @@ export default function JournalPage() {
                     <p className="text-gray-500 font-light leading-relaxed mb-8 text-sm sm:text-base">
                       {featuredArticle.excerpt}
                     </p>
-                    <span className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest border-b border-black pb-0.5 group-hover:text-gray-500 group-hover:border-gray-500 transition-all">
+                    <span className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest border-b border-primary pb-0.5 group-hover:text-gray-500 group-hover:border-gray-500 transition-all">
                       Read Article <ArrowRight className="h-3 w-3" />
                     </span>
                   </div>
@@ -164,7 +164,7 @@ export default function JournalPage() {
                     </div>
                     <div className="flex flex-col flex-grow">
                       <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-3">
-                        <span className="text-black">{article.category}</span>
+                        <span className="text-secondary">{article.category}</span>
                         <span>{article.readTime}</span>
                       </div>
                       <h3 className="text-xl font-medium tracking-tight mb-3 group-hover:text-gray-600 transition-colors leading-snug">
@@ -174,7 +174,7 @@ export default function JournalPage() {
                         {article.excerpt}
                       </p>
                       <div className="mt-auto">
-                        <span className="text-[10px] font-bold uppercase tracking-widest text-gray-400 group-hover:text-black transition-colors">
+                        <span className="text-[10px] font-bold uppercase tracking-widest text-gray-400 group-hover:text-secondary transition-colors">
                           Read More —
                         </span>
                       </div>
@@ -206,12 +206,12 @@ export default function JournalPage() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               disabled={subscribing}
-              className="flex-1 bg-transparent border-b border-gray-300 py-3 text-sm focus:outline-none focus:border-black transition-colors disabled:opacity-50"
+              className="flex-1 bg-transparent border-b border-gray-300 py-3 text-sm focus:outline-none focus:border-primary transition-colors disabled:opacity-50"
             />
             <button
               type="submit"
               disabled={subscribing}
-              className="bg-black text-white px-8 py-3 rounded-lg text-xs font-bold uppercase tracking-widest hover:bg-gray-800 transition-colors disabled:opacity-70 flex items-center justify-center min-w-[140px]"
+              className="bg-primary text-white px-8 py-3 rounded-lg text-xs font-bold uppercase tracking-widest hover:opacity-90 transition-colors disabled:opacity-70 flex items-center justify-center min-w-[140px]"
             >
               {subscribing ? "Wait..." : "Subscribe"}
             </button>

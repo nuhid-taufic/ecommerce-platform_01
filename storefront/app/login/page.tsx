@@ -188,11 +188,11 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#FAFAFA] font-sans text-[#111111] selection:bg-black selection:text-white flex flex-col">
+    <div className="min-h-screen bg-[#FAFAFA] font-sans text-[#111111] selection:bg-primary selection:text-white flex flex-col">
       <div className="flex-grow flex items-center justify-center px-4 sm:px-6 lg:px-8 pt-20 pb-12">
         <div className="w-full max-w-[400px]">
           <div className="text-center mb-12">
-            <div className="w-12 h-12 bg-black rounded-full flex items-center justify-center mx-auto mb-6">
+            <div className="w-12 h-12 bg-primary rounded-full flex items-center justify-center mx-auto mb-6">
               <div className="w-4 h-4 bg-white rounded-full"></div>
             </div>
             <h1 className="text-3xl font-medium tracking-tight mb-2">
@@ -228,11 +228,11 @@ export default function LoginPage() {
                   onChange={(e) => setResetEmail(e.target.value)}
                   placeholder="Registered Email"
                   required
-                  className="w-full bg-transparent border-b border-gray-300 py-3 text-sm focus:outline-none focus:border-black transition-colors peer placeholder-transparent"
+                  className="w-full bg-transparent border-b border-gray-300 py-3 text-sm focus:outline-none focus:border-primary transition-colors peer placeholder-transparent"
                 />
                 <label
                   htmlFor="resetEmail"
-                  className="absolute left-0 -top-3.5 text-xs text-gray-400 font-medium transition-all peer-placeholder-shown:text-sm peer-placeholder-shown:text-gray-400 peer-placeholder-shown:top-3 peer-focus:-top-3.5 peer-focus:text-xs peer-focus:text-black"
+                  className="absolute left-0 -top-3.5 text-xs text-gray-400 font-medium transition-all peer-placeholder-shown:text-sm peer-placeholder-shown:text-gray-400 peer-placeholder-shown:top-3 peer-focus:-top-3.5 peer-focus:text-xs peer-focus:text-secondary"
                 >
                   Registered Email
                 </label>
@@ -240,14 +240,14 @@ export default function LoginPage() {
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full bg-black text-white py-4 text-xs font-bold uppercase tracking-widest hover:bg-gray-800 transition-all shadow-xl shadow-black/10 flex items-center justify-center gap-2 active:scale-[0.98] disabled:opacity-70 mt-2"
+                className="w-full bg-primary text-white py-4 text-xs font-bold uppercase tracking-widest hover:opacity-90 transition-all shadow-xl shadow-black/10 flex items-center justify-center gap-2 active:scale-[0.98] disabled:opacity-70 mt-2"
               >
                 {isLoading ? "Sending..." : "Send Reset Code"}
               </button>
               <button
                 type="button"
                 onClick={() => setForgotPasswordStep(0)}
-                className="text-xs text-gray-400 hover:text-black mt-2"
+                className="text-xs text-gray-400 hover:text-secondary mt-2"
               >
                 Back to Login
               </button>
@@ -266,11 +266,11 @@ export default function LoginPage() {
                   placeholder="6-Digit Code"
                   required
                   maxLength={6}
-                  className="w-full bg-transparent border-b border-gray-300 py-3 text-sm focus:outline-none focus:border-black transition-colors peer placeholder-transparent text-center tracking-[1em] font-mono text-xl"
+                  className="w-full bg-transparent border-b border-gray-300 py-3 text-sm focus:outline-none focus:border-primary transition-colors peer placeholder-transparent text-center tracking-[1em] font-mono text-xl"
                 />
                 <label
                   htmlFor="resetOtp"
-                  className="absolute left-0 -top-3.5 text-xs text-gray-400 font-medium transition-all peer-placeholder-shown:text-sm peer-placeholder-shown:text-gray-400 peer-placeholder-shown:top-3 peer-focus:-top-3.5 peer-focus:text-xs peer-focus:text-black"
+                  className="absolute left-0 -top-3.5 text-xs text-gray-400 font-medium transition-all peer-placeholder-shown:text-sm peer-placeholder-shown:text-gray-400 peer-placeholder-shown:top-3 peer-focus:-top-3.5 peer-focus:text-xs peer-focus:text-secondary"
                 >
                   Reset Code
                 </label>
@@ -278,14 +278,14 @@ export default function LoginPage() {
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full bg-black text-white py-4 text-xs font-bold uppercase tracking-widest hover:bg-gray-800 transition-all flex items-center justify-center gap-2 active:scale-[0.98] disabled:opacity-70 mt-2"
+                className="w-full bg-primary text-white py-4 text-xs font-bold uppercase tracking-widest hover:opacity-90 transition-all flex items-center justify-center gap-2 active:scale-[0.98] disabled:opacity-70 mt-2"
               >
                 {isLoading ? "Verifying..." : "Verify Code"}
               </button>
               <button
                 type="button"
                 onClick={() => setForgotPasswordStep(0)}
-                className="text-xs text-gray-400 hover:text-black mt-2"
+                className="text-xs text-gray-400 hover:text-secondary mt-2"
               >
                 Cancel Reset
               </button>
@@ -304,11 +304,11 @@ export default function LoginPage() {
                   placeholder="New Password"
                   required
                   minLength={6}
-                  className="w-full bg-transparent border-b border-gray-300 py-3 text-sm focus:outline-none focus:border-black transition-colors peer placeholder-transparent"
+                  className="w-full bg-transparent border-b border-gray-300 py-3 text-sm focus:outline-none focus:border-primary transition-colors peer placeholder-transparent"
                 />
                 <label
                   htmlFor="newPassword"
-                  className="absolute left-0 -top-3.5 text-xs text-gray-400 font-medium transition-all peer-placeholder-shown:text-sm peer-placeholder-shown:text-gray-400 peer-placeholder-shown:top-3 peer-focus:-top-3.5 peer-focus:text-xs peer-focus:text-black"
+                  className="absolute left-0 -top-3.5 text-xs text-gray-400 font-medium transition-all peer-placeholder-shown:text-sm peer-placeholder-shown:text-gray-400 peer-placeholder-shown:top-3 peer-focus:-top-3.5 peer-focus:text-xs peer-focus:text-secondary"
                 >
                   New Password
                 </label>
@@ -316,7 +316,7 @@ export default function LoginPage() {
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full bg-black text-white py-4 text-xs font-bold uppercase tracking-widest hover:bg-gray-800 transition-all flex items-center justify-center gap-2 active:scale-[0.98] disabled:opacity-70 mt-2"
+                className="w-full bg-primary text-white py-4 text-xs font-bold uppercase tracking-widest hover:opacity-90 transition-all flex items-center justify-center gap-2 active:scale-[0.98] disabled:opacity-70 mt-2"
               >
                 {isLoading ? "Updating..." : "Update Password"}
               </button>
@@ -334,11 +334,11 @@ export default function LoginPage() {
                     onChange={(e) => setName(e.target.value)}
                     placeholder="Full Name"
                     required={!isLogin}
-                    className="w-full bg-transparent border-b border-gray-300 py-3 text-sm focus:outline-none focus:border-black transition-colors peer placeholder-transparent"
+                    className="w-full bg-transparent border-b border-gray-300 py-3 text-sm focus:outline-none focus:border-primary transition-colors peer placeholder-transparent"
                   />
                   <label
                     htmlFor="name"
-                    className="absolute left-0 -top-3.5 text-xs text-gray-400 font-medium transition-all peer-placeholder-shown:text-sm peer-placeholder-shown:text-gray-400 peer-placeholder-shown:top-3 peer-focus:-top-3.5 peer-focus:text-xs peer-focus:text-black"
+                    className="absolute left-0 -top-3.5 text-xs text-gray-400 font-medium transition-all peer-placeholder-shown:text-sm peer-placeholder-shown:text-gray-400 peer-placeholder-shown:top-3 peer-focus:-top-3.5 peer-focus:text-xs peer-focus:text-secondary"
                   >
                     Full Name
                   </label>
@@ -353,11 +353,11 @@ export default function LoginPage() {
                   onChange={(e) => setContact(e.target.value)}
                   placeholder="Email Address"
                   required
-                  className="w-full bg-transparent border-b border-gray-300 py-3 text-sm focus:outline-none focus:border-black transition-colors peer placeholder-transparent"
+                  className="w-full bg-transparent border-b border-gray-300 py-3 text-sm focus:outline-none focus:border-primary transition-colors peer placeholder-transparent"
                 />
                 <label
                   htmlFor="contact"
-                  className="absolute left-0 -top-3.5 text-xs text-gray-400 font-medium transition-all peer-placeholder-shown:text-sm peer-placeholder-shown:text-gray-400 peer-placeholder-shown:top-3 peer-focus:-top-3.5 peer-focus:text-xs peer-focus:text-black"
+                  className="absolute left-0 -top-3.5 text-xs text-gray-400 font-medium transition-all peer-placeholder-shown:text-sm peer-placeholder-shown:text-gray-400 peer-placeholder-shown:top-3 peer-focus:-top-3.5 peer-focus:text-xs peer-focus:text-secondary"
                 >
                   Email Address
                 </label>
@@ -374,11 +374,11 @@ export default function LoginPage() {
                     onChange={(e) => setMobile(e.target.value)}
                     placeholder="Mobile Number"
                     required={!isLogin}
-                    className="w-full bg-transparent border-b border-gray-300 py-3 text-sm focus:outline-none focus:border-black transition-colors peer placeholder-transparent"
+                    className="w-full bg-transparent border-b border-gray-300 py-3 text-sm focus:outline-none focus:border-primary transition-colors peer placeholder-transparent"
                   />
                   <label
                     htmlFor="mobile"
-                    className="absolute left-0 -top-3.5 text-xs text-gray-400 font-medium transition-all peer-placeholder-shown:text-sm peer-placeholder-shown:text-gray-400 peer-placeholder-shown:top-3 peer-focus:-top-3.5 peer-focus:text-xs peer-focus:text-black"
+                    className="absolute left-0 -top-3.5 text-xs text-gray-400 font-medium transition-all peer-placeholder-shown:text-sm peer-placeholder-shown:text-gray-400 peer-placeholder-shown:top-3 peer-focus:-top-3.5 peer-focus:text-xs peer-focus:text-secondary"
                   >
                     Mobile Number
                   </label>
@@ -393,11 +393,11 @@ export default function LoginPage() {
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="Password"
                   required
-                  className="w-full bg-transparent border-b border-gray-300 py-3 text-sm focus:outline-none focus:border-black transition-colors peer placeholder-transparent"
+                  className="w-full bg-transparent border-b border-gray-300 py-3 text-sm focus:outline-none focus:border-primary transition-colors peer placeholder-transparent"
                 />
                 <label
                   htmlFor="password"
-                  className="absolute left-0 -top-3.5 text-xs text-gray-400 font-medium transition-all peer-placeholder-shown:text-sm peer-placeholder-shown:text-gray-400 peer-placeholder-shown:top-3 peer-focus:-top-3.5 peer-focus:text-xs peer-focus:text-black"
+                  className="absolute left-0 -top-3.5 text-xs text-gray-400 font-medium transition-all peer-placeholder-shown:text-sm peer-placeholder-shown:text-gray-400 peer-placeholder-shown:top-3 peer-focus:-top-3.5 peer-focus:text-xs peer-focus:text-secondary"
                 >
                   Password
                 </label>
@@ -408,7 +408,7 @@ export default function LoginPage() {
                   <button
                     onClick={() => setForgotPasswordStep(1)}
                     type="button"
-                    className="text-xs text-gray-400 hover:text-black transition-colors font-medium"
+                    className="text-xs text-gray-400 hover:text-secondary transition-colors font-medium"
                   >
                     Forgot Password?
                   </button>
@@ -418,7 +418,7 @@ export default function LoginPage() {
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full bg-black text-white py-4 text-xs font-bold uppercase tracking-widest hover:bg-gray-800 transition-all shadow-xl shadow-black/10 flex items-center justify-center gap-2 active:scale-[0.98] disabled:opacity-70 mt-2"
+                className="w-full bg-primary text-white py-4 text-xs font-bold uppercase tracking-widest hover:opacity-90 transition-all shadow-xl shadow-black/10 flex items-center justify-center gap-2 active:scale-[0.98] disabled:opacity-70 mt-2"
               >
                 {isLoading
                   ? "Processing..."
@@ -448,7 +448,7 @@ export default function LoginPage() {
                   const returnTo = searchParams.get("redirect") || "/";
                   window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/auth/google?action=${isLogin ? "login" : "register"}&returnTo=${encodeURIComponent(returnTo)}`;
                 }}
-                className="w-full bg-white border border-gray-300 text-black py-4 text-xs font-bold uppercase tracking-widest hover:bg-gray-50 transition-all flex items-center justify-center gap-3 active:scale-[0.98]"
+                className="w-full bg-white border border-gray-300 text-secondary py-4 text-xs font-bold uppercase tracking-widest hover:bg-gray-50 transition-all flex items-center justify-center gap-3 active:scale-[0.98]"
               >
                 <svg className="w-4 h-4" viewBox="0 0 24 24">
                   <path
@@ -484,7 +484,7 @@ export default function LoginPage() {
                       setMobile("");
                       setPassword("");
                     }}
-                    className="text-black font-medium border-b border-black pb-0.5 ml-1 hover:text-gray-600 transition-colors"
+                    className="text-secondary font-medium border-b border-primary pb-0.5 ml-1 hover:text-gray-600 transition-colors"
                   >
                     {isLogin ? "Create one" : "Sign in"}
                   </button>

@@ -6,7 +6,7 @@ import { ShoppingBag, ArrowRight } from "lucide-react";
 
 export default function AboutPage() {
   return (
-    <div className="min-h-screen bg-[#FAFAFA] font-sans text-[#111111] selection:bg-black selection:text-white flex flex-col overflow-hidden">
+    <div className="min-h-screen bg-[#FAFAFA] font-sans text-[#111111] selection:bg-primary selection:text-white flex flex-col overflow-hidden">
       {/* Minimal Navbar */}
 
       <main className="flex-grow">
@@ -69,7 +69,7 @@ export default function AboutPage() {
         </section>
 
         {/* Bottom CTA */}
-        <section className="bg-black text-white py-32 px-6 lg:px-8 text-center mt-10">
+        <section className="bg-primary text-white py-32 px-6 lg:px-8 text-center mt-10">
           <h2 className="text-4xl sm:text-6xl font-medium tracking-tighter mb-8">
             Experience the collection.
           </h2>

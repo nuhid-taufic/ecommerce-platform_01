@@ -6,9 +6,11 @@ const {
   getAllOrders,
   updateOrderTracking,
   updateOrderStatus,
+  createManualOrder,
 } = require("../controllers/orderController");
 
 router.get("/", getAllOrders);
+router.post("/manual-order", createManualOrder);
 
 router.get("/my-orders/:email", getUserOrders);
 

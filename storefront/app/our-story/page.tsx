@@ -26,7 +26,7 @@ export default function OurStoryPage() {
           </p>
           <p>
             We started{" "}
-            <strong className="font-medium text-black">STUDIO.</strong> with a
+            <strong className="font-medium text-secondary">STUDIO.</strong> with a
             simple philosophy: strip away the unnecessary and focus on what
             truly matters. In a world of fast fashion and disposable goods, we
             believe in creating pieces that endure—both in style and substance.
@@ -44,7 +44,7 @@ export default function OurStoryPage() {
         <div className="mt-24 pt-12 border-t border-gray-200 animate-in fade-in duration-1000 delay-300 fill-mode-both">
           <Link
             href="/shop"
-            className="inline-flex items-center gap-3 text-xs font-bold uppercase tracking-widest border-b-2 border-black pb-1 hover:text-gray-500 hover:border-gray-500 transition-all group"
+            className="inline-flex items-center gap-3 text-xs font-bold uppercase tracking-widest border-b-2 border-primary pb-1 hover:text-gray-500 hover:border-gray-500 transition-all group"
           >
             Explore the Collection
             <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />

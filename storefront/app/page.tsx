@@ -129,7 +129,7 @@ export default function HomePage() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-[#FAFAFA] font-sans text-[#111111] selection:bg-black selection:text-white overflow-hidden">
+    <div className="min-h-screen bg-[#FAFAFA] font-sans text-[#111111] selection:bg-primary selection:text-white overflow-hidden">
       {/* Infinite Marquee Banner */}
       <div className="border-b border-gray-200 bg-white overflow-hidden py-3 flex whitespace-nowrap relative z-20">
         <style
@@ -186,7 +186,7 @@ export default function HomePage() {
                     href={`/shop/${slide._id}`}
                     className="group inline-flex items-center gap-4 text-sm font-medium uppercase tracking-widest"
                   >
-                    <span className="w-12 h-[1px] bg-black group-hover:w-20 transition-all duration-500 ease-out"></span>
+                    <span className="w-12 h-[1px] bg-primary group-hover:w-20 transition-all duration-500 ease-out"></span>
                     Explore Details
                   </Link>
                   <div className="flex items-center gap-3">
@@ -237,7 +237,7 @@ export default function HomePage() {
                   <button
                     key={index}
                     onClick={() => setCurrentSlide(index)}
-                    className={`w-1.5 h-1.5 rounded-full transition-all duration-500 ${currentSlide === index ? "w-5 bg-black" : "bg-gray-400 hover:bg-gray-600"}`}
+                    className={`w-1.5 h-1.5 rounded-full transition-all duration-500 ${currentSlide === index ? "w-5 bg-primary" : "bg-gray-400 hover:bg-gray-600"}`}
                   />
                 ))}
               </div>
@@ -421,7 +421,7 @@ export default function HomePage() {
                           </span>
                         )}
                         <p
-                          className={`text-sm sm:text-base font-black tracking-tight ${product.isFlashSale ? "text-red-500" : "text-black"}`}
+                          className={`text-sm sm:text-base font-black tracking-tight ${product.isFlashSale ? "text-red-500" : "text-secondary"}`}
                         >
                           ${product.price}
                         </p>
@@ -461,7 +461,7 @@ export default function HomePage() {
                         addToCart({ ...product, quantity: 1 });
                         toast.success("Added to bag!");
                       }}
-                      className="h-9 w-9 rounded-full bg-white border border-gray-200 shadow-sm flex items-center justify-center text-gray-900 hover:bg-black hover:border-black hover:text-white transition-all shrink-0"
+                      className="h-9 w-9 rounded-full bg-white border border-gray-200 shadow-sm flex items-center justify-center text-gray-900 hover:bg-primary hover:border-primary hover:text-white transition-all shrink-0"
                       title="Add to Cart"
                     >
                       <ShoppingBag className="h-[18px] w-[18px]" />
@@ -538,7 +538,7 @@ function CategorySliderCard({
 
       {type === "small-top" && (
         <>
-          <div className="absolute inset-0 bg-black/20 z-20 group-hover:bg-black/40 transition-colors duration-500"></div>
+          <div className="absolute inset-0 bg-primary/20 z-20 group-hover:bg-primary/40 transition-colors duration-500"></div>
           <div className="absolute bottom-6 left-6 z-30">
             <p className="text-white text-xl font-medium tracking-tight">
               {data.title}
@@ -550,7 +550,7 @@ function CategorySliderCard({
       {type === "small-bottom" && (
         <>
           {images.length > 0 && (
-            <div className="absolute inset-0 bg-black/40 z-20 group-hover:bg-black/60 transition-colors duration-500"></div>
+            <div className="absolute inset-0 bg-primary/40 z-20 group-hover:bg-primary/60 transition-colors duration-500"></div>
           )}
           <div className="absolute inset-0 flex items-center justify-center p-8 text-center z-30">
             <div className="text-white group-hover:-translate-y-2 transition-transform duration-500">

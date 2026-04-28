@@ -208,7 +208,7 @@ export default function ProductDetailsPage() {
         <h1 className="text-2xl font-medium">Product Not Found</h1>
         <Link
           href="/shop"
-          className="text-sm font-bold uppercase tracking-widest border-b border-black pb-1 hover:text-gray-500 transition-colors"
+          className="text-sm font-bold uppercase tracking-widest border-b border-primary pb-1 hover:text-gray-500 transition-colors"
         >
           Return to Shop
         </Link>
@@ -216,19 +216,19 @@ export default function ProductDetailsPage() {
     );
 
   return (
-    <div className="min-h-screen bg-[#FAFAFA] font-sans text-[#111111] selection:bg-black selection:text-white pb-32">
+    <div className="min-h-screen bg-[#FAFAFA] font-sans text-[#111111] selection:bg-primary selection:text-white pb-32">
 
       <div className="max-w-7xl mx-auto px-6 lg:px-8 py-4">
         <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-gray-400">
-          <Link href="/" className="hover:text-black transition-colors">
+          <Link href="/" className="hover:text-secondary transition-colors">
             Home
           </Link>
           <ChevronRight className="h-3 w-3" />
-          <Link href="/shop" className="hover:text-black transition-colors">
+          <Link href="/shop" className="hover:text-secondary transition-colors">
             Collection
           </Link>
           <ChevronRight className="h-3 w-3" />
-          <span className="text-black line-clamp-1 max-w-[200px]">
+          <span className="text-secondary line-clamp-1 max-w-[200px]">
             {product.name}
           </span>
         </div>
@@ -270,13 +270,13 @@ export default function ProductDetailsPage() {
               {/* Navigation Arrows */}
               <button 
                 onClick={() => setActiveImageIndex(prev => Math.max(0, prev - 1))}
-                className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/80 backdrop-blur shadow-lg flex items-center justify-center text-gray-400 hover:text-black opacity-0 group-hover:opacity-100 transition-opacity"
+                className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/80 backdrop-blur shadow-lg flex items-center justify-center text-gray-400 hover:text-secondary opacity-0 group-hover:opacity-100 transition-opacity"
               >
                 <ArrowLeft className="w-5 h-5" />
               </button>
               <button 
                 onClick={() => setActiveImageIndex(prev => Math.min((product.images?.length || 0), prev + 1))}
-                className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/80 backdrop-blur shadow-lg flex items-center justify-center text-gray-400 hover:text-black opacity-0 group-hover:opacity-100 transition-opacity"
+                className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/80 backdrop-blur shadow-lg flex items-center justify-center text-gray-400 hover:text-secondary opacity-0 group-hover:opacity-100 transition-opacity"
               >
                 <ArrowRight className="w-5 h-5" />
               </button>
@@ -326,7 +326,7 @@ export default function ProductDetailsPage() {
             <div className="flex items-center border border-gray-200 rounded-lg p-1 bg-white">
               <button
                 onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                className="w-10 h-10 flex items-center justify-center text-gray-400 hover:text-black transition-colors"
+                className="w-10 h-10 flex items-center justify-center text-gray-400 hover:text-secondary transition-colors"
               >
                 <Minus className="w-4 h-4" />
               </button>
@@ -338,7 +338,7 @@ export default function ProductDetailsPage() {
               />
               <button
                 onClick={() => setQuantity(Math.min(product.stock, quantity + 1))}
-                className="w-10 h-10 flex items-center justify-center text-gray-400 hover:text-black transition-colors"
+                className="w-10 h-10 flex items-center justify-center text-gray-400 hover:text-secondary transition-colors"
               >
                 <Plus className="w-4 h-4" />
               </button>
@@ -355,7 +355,7 @@ export default function ProductDetailsPage() {
             </button>
             <Link
               href="/checkout"
-              className="bg-[#0D1D1C] text-white py-4 px-6 rounded-xl font-bold uppercase tracking-widest text-xs flex items-center justify-center gap-2 hover:bg-black transition-all shadow-lg shadow-black/10"
+              className="bg-[#0D1D1C] text-white py-4 px-6 rounded-xl font-bold uppercase tracking-widest text-xs flex items-center justify-center gap-2 hover:bg-primary transition-all shadow-lg shadow-black/10"
             >
               Buy Now
             </Link>
@@ -401,14 +401,14 @@ export default function ProductDetailsPage() {
           <div className="flex gap-12 mb-12 border-b border-gray-100 pb-4">
              <button 
                onClick={() => setActiveAccordion("details")}
-               className={`text-sm font-bold uppercase tracking-[0.2em] relative ${activeAccordion === "details" ? "text-black" : "text-gray-300"}`}
+               className={`text-sm font-bold uppercase tracking-[0.2em] relative ${activeAccordion === "details" ? "text-secondary" : "text-gray-300"}`}
              >
                Product Details
                {activeAccordion === "details" && <div className="absolute -bottom-[17px] left-0 w-full h-[3px] bg-[#FF8A00]"></div>}
              </button>
              <button 
                onClick={() => setActiveAccordion("reviews")}
-               className={`text-sm font-bold uppercase tracking-[0.2em] relative ${activeAccordion === "reviews" ? "text-black" : "text-gray-300"}`}
+               className={`text-sm font-bold uppercase tracking-[0.2em] relative ${activeAccordion === "reviews" ? "text-secondary" : "text-gray-300"}`}
              >
                Reviews ({totalReviews})
                {activeAccordion === "reviews" && <div className="absolute -bottom-[17px] left-0 w-full h-[3px] bg-[#FF8A00]"></div>}
@@ -506,7 +506,7 @@ export default function ProductDetailsPage() {
                            <button 
                             type="submit"
                             disabled={submittingReview}
-                            className="w-full bg-[#333333] text-white py-4 rounded-xl font-bold uppercase tracking-widest text-xs hover:bg-black transition-all disabled:bg-gray-300"
+                            className="w-full bg-[#333333] text-white py-4 rounded-xl font-bold uppercase tracking-widest text-xs hover:bg-primary transition-all disabled:bg-gray-300"
                            >
                               {submittingReview ? "Submitting..." : "Submit Review"}
                            </button>
@@ -526,7 +526,7 @@ export default function ProductDetailsPage() {
                       <div key={rev._id} className="bg-white border border-gray-50 p-8 rounded-3xl shadow-sm hover:shadow-md transition-shadow">
                         <div className="flex justify-between items-start mb-4">
                            <div>
-                              <p className="font-bold text-sm text-black mb-1">{rev.user?.name || "Verified Buyer"}</p>
+                              <p className="font-bold text-sm text-secondary mb-1">{rev.user?.name || "Verified Buyer"}</p>
                               <div className="flex items-center text-[#FF8A00]">
                                 {[1,2,3,4,5].map(s => (
                                   <Star key={s} className={`w-3 h-3 ${s <= rev.rating ? "fill-current" : "text-gray-100"}`} />
@@ -623,7 +623,7 @@ export default function ProductDetailsPage() {
                       addToCart({ ...item, quantity: 1 });
                       toast.success("Added to bag!");
                     }}
-                    className="h-8 w-8 rounded-full bg-white border border-gray-200 flex items-center justify-center text-gray-900 hover:bg-black hover:border-black hover:text-white transition-all shrink-0"
+                    className="h-8 w-8 rounded-full bg-white border border-gray-200 flex items-center justify-center text-gray-900 hover:bg-primary hover:border-primary hover:text-white transition-all shrink-0"
                     title="Add to Cart"
                   >
                     <ShoppingBag className="h-4 w-4" />

@@ -69,11 +69,6 @@ export default function MainLayout() {
       path: "/flash-sales",
       icon: <Zap className="h-5 w-5" />,
     },
-    {
-      title: "Shipping",
-      path: "/shipping",
-      icon: <Truck className="h-5 w-5" />,
-    },
     { title: "Reviews", path: "/reviews", icon: <Star className="h-5 w-5" /> },
     {
       title: "Helpdesk",
@@ -81,11 +76,6 @@ export default function MainLayout() {
       icon: <Headset className="h-5 w-5" />,
     },
     { title: "Media", path: "/media", icon: <Image className="h-5 w-5" /> },
-    {
-      title: "Recommendations",
-      path: "/recommendations",
-      icon: <Sparkles className="h-5 w-5" />,
-    },
     { title: "Staff", path: "/staff", icon: <UserCog className="h-5 w-5" /> },
     {
       title: "Hero Slider",

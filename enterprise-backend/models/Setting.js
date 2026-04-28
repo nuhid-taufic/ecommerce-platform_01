@@ -24,6 +24,30 @@ const settingSchema = new mongoose.Schema(
       facebook: { type: String },
       instagram: { type: String },
     },
+
+    // Advanced Configurations
+    isMaintenanceMode: { type: Boolean, default: false },
+    currencySymbol: { type: String, default: "৳" },
+    currencyCode: { type: String, default: "BDT" },
+    
+    // Announcement Bar
+    showAnnouncement: { type: Boolean, default: false },
+    announcementText: { type: String, default: "Welcome to our store!" },
+    announcementLink: { type: String },
+
+    // SEO Settings
+    seoDescription: { type: String },
+    seoKeywords: { type: String },
+    
+    // Store Policies
+    storeAddress: { type: String },
+    footerText: { type: String },
+    refundPolicyUrl: { type: String },
+    privacyPolicyUrl: { type: String },
+    termsUrl: { type: String },
+    
+    // Tax & Fees
+    taxRate: { type: Number, default: 0 },
   },
   { timestamps: true },
 );
