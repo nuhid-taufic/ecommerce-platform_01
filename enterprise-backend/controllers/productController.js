@@ -1,4 +1,5 @@
 const Product = require("../models/Product");
+const Category = require("../models/Category");
 const HomeSettings = require("../models/HomeSettings");
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 
@@ -17,7 +18,7 @@ const generateEmbedding = async (text) => {
 
 const createProduct = async (req, res) => {
   try {
-    const { name, description, price, category, stock, image, currency } =
+    const { name, description, price, category, stock, image, images, benefits, productId, currency } =
       req.body;
     const imageUrl = image || (req.file ? req.file.path : "");
 
@@ -36,12 +37,24 @@ const createProduct = async (req, res) => {
       price,
       currency: currency || "USD",
       image: imageUrl,
+      images: images || [],
       category,
       stock,
+      benefits: benefits || [],
+      productId: productId || `PRD-${Math.floor(1000 + Math.random() * 9000)}`,
       embedding: embeddingData.length > 0 ? embeddingData : undefined,
     });
 
     await product.save();
+
+    // Ensure category exists in Category collection
+    if (category) {
+      const categoryExists = await Category.findOne({ name: category });
+      if (!categoryExists) {
+        await Category.create({ name: category });
+      }
+    }
+
     res
       .status(201)
       .json({
@@ -104,6 +117,14 @@ const updateProduct = async (req, res) => {
       returnDocument: "after",
       runValidators: true,
     });
+
+    // Ensure category exists in Category collection
+    if (updatedData.category) {
+      const categoryExists = await Category.findOne({ name: updatedData.category });
+      if (!categoryExists) {
+        await Category.create({ name: updatedData.category });
+      }
+    }
 
     if (!product) {
       return res
