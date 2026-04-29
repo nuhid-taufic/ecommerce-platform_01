@@ -203,36 +203,48 @@ const semanticSearch = async (req, res) => {
         .status(400)
         .json({ success: false, message: "Search query is required" });
 
-    const queryVector = await generateEmbedding(query);
-
-    if (queryVector.length === 0) {
-      return res
-        .status(500)
-        .json({ success: false, message: "AI failed to process search" });
+    let products = [];
+    
+    try {
+      // 1. Try MongoDB Atlas Vector Search
+      const queryVector = await generateEmbedding(query);
+      if (queryVector && queryVector.length > 0) {
+        products = await Product.aggregate([
+          {
+            $vectorSearch: {
+              index: "vector_index",
+              path: "embedding",
+              queryVector: queryVector,
+              numCandidates: 50,
+              limit: 5,
+            },
+          },
+          {
+            $project: {
+              name: 1,
+              description: 1,
+              price: 1,
+              category: 1,
+              image: 1,
+              score: { $meta: "vectorSearchScore" },
+            },
+          },
+        ]);
+      }
+    } catch (vectorError) {
+      console.warn("Vector search failed or not configured, falling back to regex search.");
     }
 
-    // MongoDB Atlas Vector Search
-    const products = await Product.aggregate([
-      {
-        $vectorSearch: {
-          index: "vector_index",
-          path: "embedding",
-          queryVector: queryVector,
-          numCandidates: 50,
-          limit: 5,
-        },
-      },
-      {
-        $project: {
-          name: 1,
-          description: 1,
-          price: 1,
-          category: 1,
-          image: 1,
-          score: { $meta: "vectorSearchScore" },
-        },
-      },
-    ]);
+    // 2. Fallback to normal text search if no products found or vector search failed
+    if (products.length === 0) {
+      products = await Product.find({
+        $or: [
+          { name: { $regex: query, $options: "i" } },
+          { description: { $regex: query, $options: "i" } },
+          { category: { $regex: query, $options: "i" } }
+        ]
+      }).limit(5).select("name description price category image");
+    }
 
     res.status(200).json({ success: true, products });
   } catch (error) {
@@ -245,27 +257,20 @@ const semanticSearch = async (req, res) => {
 
 const getCategories = async (req, res) => {
   try {
-    const settings = await HomeSettings.findOne();
-    let categories = [];
+    // Fetch all categories from the managed Category collection
+    const categoriesList = await Category.find().sort({ name: 1 });
+    
+    // Extract just the names for the array-based frontend logic
+    let categories = categoriesList.map(c => c.name);
 
-    if (settings && settings.bentoBox && settings.bentoBox.length > 0) {
-      categories = settings.bentoBox
-        .map((item) => item.title)
-        .filter((title) => title && title.trim() !== "");
-      // Unique categories
-      categories = Array.from(new Set(categories));
-    }
-
+    // Fallback: If no categories exist in the collection, check products
     if (categories.length === 0) {
       categories = await Product.distinct("category");
-      categories = categories.filter((cat) => cat && cat.trim() !== "");
     }
 
     res.status(200).json({ success: true, categories });
   } catch (error) {
-    res
-      .status(500)
-      .json({ success: false, message: "Server Error", error: error.message });
+    res.status(500).json({ success: false, message: "Server Error", error: error.message });
   }
 };
 

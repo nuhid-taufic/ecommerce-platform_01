@@ -15,6 +15,7 @@ import Link from "next/link";
 import toast from "react-hot-toast";
 import { useCartStore } from "../store/cartStore.js";
 import { useWishlistStore } from "../store/wishlistStore.js";
+import { useSettingsStore } from "../store/settingsStore.js";
 
 export default function HomePage() {
   const [products, setProducts] = useState<any[]>([]);
@@ -27,6 +28,11 @@ export default function HomePage() {
     useCartStore();
   const { addToWishlist, removeFromWishlist, isInWishlist } =
     useWishlistStore();
+  const { settings, fetchSettings } = useSettingsStore();
+
+  useEffect(() => {
+    fetchSettings();
+  }, [fetchSettings]);
 
   useEffect(() => {
     if (heroSlides.length <= 1) return;
@@ -57,12 +63,39 @@ export default function HomePage() {
         }
 
         if (productsRes.ok && productsData.success) {
-          let allProducts = productsData.products
-            .filter((p: any) => p.stock > 0)
-            .reverse();
+          const rawProducts = productsData.products || [];
 
-          // Apply flash sale prices
-          allProducts = allProducts.map((p: any) => {
+          // 1. Prepare Hero Slides (Flash Sales + Featured)
+          const flashSaleItems = rawProducts.filter((p: any) => 
+            flashSaleMap.has(p._id)
+          ).map((p: any) => ({
+            ...p,
+            originalPrice: p.price,
+            price: flashSaleMap.get(p._id),
+            isFlashSale: true
+          }));
+
+          const featuredItems = rawProducts.filter((p: any) => p.isFeaturedHero);
+
+          let sliderItems = [...flashSaleItems, ...featuredItems];
+          
+          // Remove duplicates and limit to 5
+          sliderItems = Array.from(
+            new Map(sliderItems.map((item: any) => [item._id, item])).values(),
+          ).slice(0, 5);
+
+          // If no featured items, use latest in-stock products
+          if (sliderItems.length === 0) {
+            sliderItems = rawProducts.filter((p: any) => p.stock > 0).slice(0, 5);
+          }
+          
+          setHeroSlides(sliderItems);
+
+          // 2. Prepare New Arrivals (In-stock only, newest first)
+          let inStockProducts = rawProducts.filter((p: any) => p.stock > 0);
+          
+          // Apply flash sale prices to display list
+          inStockProducts = inStockProducts.map((p: any) => {
             if (flashSaleMap.has(p._id)) {
               return {
                 ...p,
@@ -74,20 +107,7 @@ export default function HomePage() {
             return p;
           });
 
-          setProducts(allProducts.slice(0, 8));
-
-          const flashSaleItems = allProducts.filter((p: any) => p.isFlashSale);
-          const featured = allProducts.filter((p: any) => p.isFeaturedHero);
-
-          let sliderItems = [...flashSaleItems, ...featured];
-          if (sliderItems.length === 0) sliderItems = allProducts;
-
-          // Remove duplicates
-          sliderItems = Array.from(
-            new Map(sliderItems.map((item: any) => [item._id, item])).values(),
-          );
-
-          setHeroSlides(sliderItems.slice(0, 4));
+          setProducts(inStockProducts.slice(0, 8));
         }
 
         const settingsRes = await fetch(
@@ -131,21 +151,23 @@ export default function HomePage() {
   return (
     <div className="min-h-screen bg-[#FAFAFA] font-sans text-[#111111] selection:bg-primary selection:text-white overflow-hidden">
       {/* Infinite Marquee Banner */}
-      <div className="border-b border-gray-200 bg-white overflow-hidden py-3 flex whitespace-nowrap relative z-20">
-        <style
-          dangerouslySetInnerHTML={{
-            __html: `
-            @keyframes scroll { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
-            .animate-scroll { animation: scroll 25s linear infinite; }
-          `,
-          }}
-        />
-        <div className="animate-scroll flex gap-32 items-center uppercase tracking-[0.25em] text-[11px] font-bold text-gray-400">
-          <span>Studio is a curation of minimalist essentials designed for the modern lifestyle. Premium quality guaranteed.</span>
-          <span>Studio is a curation of minimalist essentials designed for the modern lifestyle. Premium quality guaranteed.</span>
-          <span>Studio is a curation of minimalist essentials designed for the modern lifestyle. Premium quality guaranteed.</span>
+      {settings?.showMarquee && (
+        <div className="border-b border-gray-200 bg-white overflow-hidden py-3 flex whitespace-nowrap relative z-20">
+          <style
+            dangerouslySetInnerHTML={{
+              __html: `
+              @keyframes scroll { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+              .animate-scroll { animation: scroll 40s linear infinite; }
+            `,
+            }}
+          />
+          <div className="animate-scroll flex gap-20 items-center uppercase tracking-[0.25em] text-[10px] sm:text-[11px] font-black text-gray-400">
+            {[1, 2, 3, 4, 5, 6].map((i) => (
+              <span key={i} className="shrink-0">{settings.marqueeText || "STUDIO IS A CURATION OF MINIMALIST ESSENTIALS DESIGNED FOR THE MODERN LIFESTYLE."}</span>
+            ))}
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Synchronized Real-Product Hero Section */}
       <section className="relative pt-12 pb-12 lg:pt-20 lg:pb-16 px-6 lg:px-8 max-w-7xl mx-auto flex flex-col lg:flex-row items-center gap-12 lg:gap-20">

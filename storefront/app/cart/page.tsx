@@ -12,6 +12,7 @@ import {
   ChevronDown,
   ChevronUp,
   MapPin,
+  Copy,
 } from "lucide-react";
 import toast from "react-hot-toast";
 import { useCartStore } from "@/store/cartStore";
@@ -584,7 +585,26 @@ export default function CartPage() {
                 <div className="mt-4 p-4 bg-gray-50 border border-gray-200 rounded-md">
                   <p className="text-sm text-gray-700 mb-3 leading-relaxed">
                     Please send the total amount to our <strong>{paymentMethod}</strong> number: <br/>
-                    <span className="text-xl font-bold text-secondary block mt-1">01977622623</span>
+                    <div className="flex items-center gap-2 mt-2">
+                      <span className="text-xl font-bold text-secondary block">
+                        {paymentMethod === "Bkash" ? (settings?.bkashNumber || "01977622623") : 
+                         paymentMethod === "Nagad" ? (settings?.nagadNumber || "01977622623") : 
+                         (settings?.rocketNumber || "01977622623")}
+                      </span>
+                      <button 
+                        onClick={() => {
+                          const num = paymentMethod === "Bkash" ? (settings?.bkashNumber || "01977622623") : 
+                                      paymentMethod === "Nagad" ? (settings?.nagadNumber || "01977622623") : 
+                                      (settings?.rocketNumber || "01977622623");
+                          navigator.clipboard.writeText(num);
+                          toast.success("Number copied!");
+                        }}
+                        className="p-1.5 hover:bg-gray-200 rounded-md transition-colors text-gray-500"
+                        title="Copy Number"
+                      >
+                        <Copy size={16} />
+                      </button>
+                    </div>
                     <span className="text-xs text-gray-500 mt-1 block">Account Type: Personal</span>
                   </p>
                   <div className="mt-3">
