@@ -11,6 +11,7 @@ import {
   Sparkles,
   ArrowRight,
   Menu,
+  ChevronDown,
 } from "lucide-react";
 import { useAuthStore } from "@/store/authStore";
 import { useCartStore } from "@/store/cartStore";
@@ -116,243 +117,260 @@ export default function Navbar() {
     return () => clearTimeout(delaySearch);
   }, [searchQuery]);
 
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 20);
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
   if (!isClient) return null;
 
-  const handleLoginClick = () => {
-    sessionStorage.setItem("redirectUrl", pathname);
-  };
-
   return (
-    <nav className="bg-[#FAFAFA] py-5 border-b border-gray-200/50 sticky top-0 z-50">
-      <div className="max-w-7xl mx-auto px-6 lg:px-8 flex items-center justify-between relative">
-        {/* 1. Logo and Mobile Menu Toggle */}
-        <div className="flex items-center gap-4 shrink-0">
-          <button
-            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className="md:hidden text-secondary hover:opacity-70 transition-opacity"
+    <header className="sticky top-0 z-50 bg-white">
+      {/* Announcement Bar */}
+      {settings?.showAnnouncement && (
+        <div className="bg-primary text-white py-2 px-4 sm:px-6 text-center border-b border-white/10 overflow-hidden">
+          <Link 
+            href={settings.announcementLink || "#"} 
+            className="text-[8px] sm:text-[9px] font-black uppercase tracking-[0.2em] sm:tracking-[0.25em] hover:opacity-80 transition-opacity block truncate"
           >
-            {isMobileMenuOpen ? (
-              <X className="h-6 w-6" />
-            ) : (
-              <Menu className="h-6 w-6" />
-            )}
-          </button>
-          <Link href="/" className="flex items-center gap-2 group">
-            {settings?.logoUrl && !settings.logoUrl.startsWith("blob:") ? (
-              <img 
-                src={settings.logoUrl} 
-                alt={settings.storeName || "Logo"} 
-                className="h-8 w-auto object-contain transition-transform group-hover:scale-105" 
-              />
-            ) : (
-              <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center group-hover:scale-90 transition-transform">
-                <div className="w-3 h-3 bg-white rounded-full"></div>
-              </div>
-            )}
-            <span className="text-xl font-bold tracking-tighter uppercase">
-              {settings?.storeName || "STUDIO."}
-            </span>
+            {settings.announcementText}
           </Link>
-        </div>
-
-        {/* 2. Dynamic Categories Navigation */}
-        {!isSearchOpen && (
-          <div className="hidden md:flex items-center gap-10 text-xs font-bold uppercase tracking-[0.15em] absolute left-1/2 -translate-x-1/2">
-            {categories.map((cat) => (
-              <Link
-                key={cat}
-                href={`/shop?category=${encodeURIComponent(cat)}`}
-                className={`transition-all duration-300 ${
-                  pathname === "/shop" &&
-                  new URLSearchParams(
-                    typeof window !== "undefined" ? window.location.search : "",
-                  ).get("category") === cat
-                    ? "text-secondary scale-110"
-                    : "text-gray-400 hover:text-secondary hover:scale-105"
-                }`}
-              >
-                {cat}
-              </Link>
-            ))}
-            {categories.length === 0 && (
-              <Link href="/shop" className="text-gray-400 hover:text-secondary">
-                Shop All
-              </Link>
-            )}
-          </div>
-        )}
-
-        {/* 3. Actions (Right Side) */}
-        <div className="flex items-center gap-4 sm:gap-6 ml-auto">
-          {/* Store Link */}
-          <Link
-            href="/shop"
-            className={`text-xs font-bold uppercase tracking-widest hover:text-gray-500 transition-colors hidden sm:block ${isSearchOpen ? "sm:hidden" : ""}`}
-          >
-            Store
-          </Link>
-
-          {/* Inline Search System */}
-          <div className="flex items-center relative">
-            {/* Search Input Box */}
-            <div
-              className={`overflow-hidden transition-all duration-300 ease-in-out flex items-center ${isSearchOpen ? "w-48 sm:w-64 opacity-100 mr-2" : "w-0 opacity-0 mr-0"}`}
-            >
-              <input
-                id="navbarSearch"
-                type="text"
-                placeholder="Ask AI..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full bg-transparent border-b border-primary py-1 px-2 text-sm outline-none placeholder:text-gray-400 text-secondary font-medium"
-                autoComplete="off"
-              />
-            </div>
-
-            {/* Search Toggle Button */}
-            <button
-              onClick={() => {
-                setIsSearchOpen(!isSearchOpen);
-                if (!isSearchOpen)
-                  setTimeout(
-                    () => document.getElementById("navbarSearch")?.focus(),
-                    100,
-                  );
-              }}
-              className="text-gray-900 hover:opacity-70 transition-opacity z-10"
-            >
-              {isSearchOpen ? (
-                <X className="h-5 w-5 stroke-[1.5]" />
-              ) : (
-                <Search className="h-5 w-5 stroke-[1.5]" />
-              )}
-            </button>
-
-            {/* Dropdown Results Box */}
-            {isSearchOpen && searchQuery.length > 0 && (
-              <div className="absolute top-[150%] right-0 w-[calc(100vw-48px)] sm:w-[400px] bg-white border border-gray-100 shadow-xl rounded-2xl overflow-hidden z-50">
-                <div className="p-4 max-h-[60vh] overflow-y-auto">
-                  {isSearching ? (
-                    <div className="flex items-center justify-center gap-2 text-gray-400 text-xs font-bold uppercase tracking-widest py-8 animate-pulse">
-                      <Sparkles className="h-4 w-4" /> AI is thinking...
-                    </div>
-                  ) : searchResults.length > 0 ? (
-                    <div className="space-y-2">
-                      <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-3 px-2">
-                        Top Matches
-                      </p>
-                      {searchResults.map((product) => (
-                        <Link
-                          key={product._id}
-                          href={`/shop/${product._id}`}
-                          onClick={() => setIsSearchOpen(false)}
-                          className="flex items-center justify-between p-2 hover:bg-gray-50 rounded-xl transition-colors group"
-                        >
-                          <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 bg-gray-100 rounded-lg overflow-hidden shrink-0">
-                              {product.image ? (
-                                <img
-                                  src={product.image}
-                                  alt={product.name}
-                                  className="w-full h-full object-cover"
-                                />
-                              ) : (
-                                <div className="w-full h-full bg-gray-200"></div>
-                              )}
-                            </div>
-                            <div>
-                              <h4 className="text-sm font-medium text-secondary group-hover:text-gray-600 transition-colors line-clamp-1">
-                                {product.name}
-                              </h4>
-                              <p className="text-[10px] text-gray-400 capitalize">
-                                {product.category || "Premium Item"}
-                              </p>
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-3 shrink-0 pl-2">
-                            <span className="text-sm font-medium">
-                              ${product.price}
-                            </span>
-                          </div>
-                        </Link>
-                      ))}
-                    </div>
-                  ) : searchQuery.length > 2 ? (
-                    <div className="text-center py-8">
-                      <p className="text-sm text-gray-500 font-medium">
-                        No results found
-                      </p>
-                      <p className="text-xs text-gray-400 mt-1">
-                        Try describing it differently.
-                      </p>
-                    </div>
-                  ) : (
-                    <div className="text-center py-6 text-xs text-gray-400">
-                      Type at least 2 characters...
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Cart Option */}
-          <Link
-            href="/cart"
-            className="relative flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-gray-900 hover:text-gray-500 transition-colors"
-          >
-            <ShoppingBag className="h-5 w-5 stroke-[1.5]" />
-            <span className="hidden sm:inline">Cart</span>
-            {cartItems.length > 0 && (
-              <span className="absolute -top-2 -right-2 bg-primary text-white text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center">
-                {cartItems.length}
-              </span>
-            )}
-          </Link>
-
-          {/* Account / Login Icon */}
-          {user ? (
-            <Link
-              href="/profile"
-              className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-secondary hover:text-gray-500 transition-colors"
-            >
-              <User className="h-5 w-5 stroke-[1.5]" />
-              <span className="hidden sm:inline">
-                {user.name?.split(" ")[0]}
-              </span>
-            </Link>
-          ) : (
-            <Link
-              href="/login"
-              onClick={handleLoginClick}
-              className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-gray-500 hover:text-secondary transition-colors"
-            >
-              <User className="h-5 w-5 stroke-[1.5]" />
-              <span className="hidden sm:inline">Login</span>
-            </Link>
-          )}
-        </div>
-      </div>
-
-      {/* Mobile Navigation Menu */}
-      {isMobileMenuOpen && (
-        <div className="md:hidden absolute top-full left-0 w-full bg-white border-b border-gray-100 shadow-xl z-40 py-8 px-8 flex flex-col gap-6 animate-in slide-in-from-top-4 duration-300">
-          <p className="text-[10px] font-black uppercase tracking-widest text-gray-300 mb-2">Categories</p>
-          {categories.map((cat) => (
-            <Link
-              key={cat}
-              href={`/shop?category=${encodeURIComponent(cat)}`}
-              onClick={() => setIsMobileMenuOpen(false)}
-              className="text-lg font-bold uppercase tracking-tight text-secondary hover:text-gray-500"
-            >
-              {cat}
-            </Link>
-          ))}
-          <div className="pt-6 border-t border-gray-50 mt-2 flex flex-col gap-4">
-             <Link href="/shop" onClick={() => setIsMobileMenuOpen(false)} className="text-sm font-bold uppercase tracking-widest text-gray-400">View All Collection</Link>
-          </div>
         </div>
       )}
-    </nav>
+
+      {/* Main Navbar */}
+      <nav 
+        className={`transition-all duration-300 ${
+          scrolled 
+            ? "bg-white/95 backdrop-blur-md border-b border-gray-100 py-1.5 sm:py-2" 
+            : "bg-white py-3 sm:py-4"
+        }`}
+      >
+        <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-10">
+          <div className="flex items-center justify-between gap-4 h-10 sm:h-12">
+            {/* Left: Logo */}
+            <div className="flex-shrink-0">
+              <Link href="/" className="flex items-center gap-2 sm:gap-3 group">
+                {settings?.logoUrl && !settings.logoUrl.startsWith("blob:") ? (
+                  <img 
+                    src={settings.logoUrl} 
+                    alt={settings.storeName || "Logo"} 
+                    className="h-6 sm:h-7 w-auto object-contain transition-transform group-hover:scale-105" 
+                  />
+                ) : (
+                  <div className="w-7 h-7 sm:w-8 sm:h-8 bg-gray-900 rounded-lg flex items-center justify-center">
+                    <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 bg-white rounded-full"></div>
+                  </div>
+                )}
+                <span className="text-base sm:text-xl font-black tracking-tighter uppercase text-gray-900 whitespace-nowrap">
+                  {settings?.storeName || "STUDIO."}
+                </span>
+              </Link>
+            </div>
+
+            {/* Center: Search & Navigation (Desktop Only) */}
+            <div className="hidden lg:flex flex-1 items-center justify-center gap-12">
+              <div className="w-full max-w-[280px] relative">
+                <div className="relative group flex items-center">
+                  <Sparkles className="h-4 w-4 text-primary mr-3 animate-pulse" />
+                  <input
+                    type="text"
+                    placeholder="Ask AI Search..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="block w-full bg-transparent border-b-2 border-gray-100 py-1.5 pr-8 text-[14px] font-black text-gray-900 placeholder:text-gray-300 focus:border-primary transition-all outline-none"
+                  />
+                  <Search size={18} className="absolute right-0 text-gray-400" strokeWidth={2.5} />
+                </div>
+
+                {/* Desktop Search Results Dropdown */}
+                {searchQuery.length >= 2 && (
+                  <div className="absolute top-full left-0 right-0 mt-4 bg-white/95 backdrop-blur-xl rounded-[24px] shadow-[0_20px_50px_-20px_rgba(0,0,0,0.15)] border border-gray-100 overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-300">
+                    <div className="p-4 max-h-[400px] overflow-y-auto no-scrollbar">
+                      {isSearching ? (
+                        <div className="py-8 text-center">
+                          <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-2" />
+                          <p className="text-[10px] font-black uppercase tracking-widest text-gray-400">AI Scanning...</p>
+                        </div>
+                      ) : searchResults.length > 0 ? (
+                        <div className="space-y-1">
+                          <p className="text-[10px] font-black uppercase tracking-widest text-primary mb-3 px-2">Top Suggestions</p>
+                          {searchResults.map((product) => (
+                            <Link
+                              key={product._id}
+                              href={`/product/${product._id}`}
+                              onClick={() => {
+                                setSearchQuery("");
+                                setSearchResults([]);
+                              }}
+                              className="flex items-center gap-4 p-2.5 hover:bg-gray-50 rounded-2xl transition-all group"
+                            >
+                              <div className="w-12 h-12 rounded-xl bg-gray-100 overflow-hidden shrink-0">
+                                <img src={product.image} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" alt={product.name} />
+                              </div>
+                              <div className="min-w-0">
+                                <p className="font-bold text-sm text-gray-900 truncate tracking-tight">{product.name}</p>
+                                <p className="text-[11px] text-gray-400 font-black tracking-tight">${product.price}</p>
+                              </div>
+                            </Link>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="py-8 text-center">
+                          <p className="text-sm font-bold text-gray-900">No results found</p>
+                          <p className="text-xs text-gray-400 mt-1">Try a different keyword</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <div className="flex items-center gap-10">
+                <Link href="/shop" className="text-[14px] font-black uppercase tracking-[0.2em] text-gray-900 hover:text-primary transition-all">
+                  Store
+                </Link>
+                {categories.slice(0, 6).map((cat) => (
+                  <Link
+                    key={cat}
+                    href={`/shop?category=${encodeURIComponent(cat)}`}
+                    className="text-[14px] font-black uppercase tracking-[0.2em] text-gray-400 hover:text-gray-900 transition-all whitespace-nowrap"
+                  >
+                    {cat}
+                  </Link>
+                ))}
+              </div>
+            </div>
+
+            {/* Right: Actions (Mobile Optimized) */}
+            <div className="flex items-center gap-2 sm:gap-6 ml-auto lg:ml-0">
+              {/* Mobile Search Icon */}
+              <button 
+                onClick={() => setIsSearchOpen(true)}
+                className="lg:hidden text-gray-900 p-2 hover:bg-gray-50 rounded-full transition-colors"
+                aria-label="Search"
+              >
+                <Search size={22} strokeWidth={2.5} />
+              </button>
+
+              <Link 
+                href="/cart" 
+                className="group relative p-2 transition-all hover:-translate-y-0.5 active:scale-90" 
+                aria-label="Cart"
+              >
+                 <div className="relative">
+                   <ShoppingBag 
+                     size={24} 
+                     strokeWidth={2} 
+                     className="text-gray-900 group-hover:text-primary transition-colors" 
+                   />
+                   {cartItems.length > 0 && (
+                     <span className="absolute -top-2 -right-2 bg-primary text-white text-[9px] font-black w-5 h-5 rounded-full flex items-center justify-center shadow-lg shadow-primary/30 border-2 border-white animate-in zoom-in duration-300">
+                       {cartItems.length}
+                     </span>
+                   )}
+                 </div>
+              </Link>
+
+              {user ? (
+                 <Link href="/profile" className="hidden sm:block w-9 h-9 rounded-full bg-gray-100 border border-gray-200 overflow-hidden hover:border-primary transition-all">
+                   {user.image ? <img src={user.image} className="w-full h-full object-cover" /> : <User size={18} className="m-2 text-gray-400" />}
+                 </Link>
+              ) : (
+                <div className="hidden sm:block">
+                  <Link 
+                    href="/login" 
+                    className="bg-gray-900 text-white text-[11px] font-black uppercase tracking-[0.2em] px-6 py-2.5 rounded-full hover:bg-primary transition-all whitespace-nowrap"
+                  >
+                    Log in
+                  </Link>
+                </div>
+              )}
+              
+              <button
+                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                className="lg:hidden text-gray-900 p-2 hover:bg-gray-50 rounded-full transition-colors"
+                aria-label="Menu"
+              >
+                <Menu size={26} />
+              </button>
+            </div>
+          </div>
+        </div>
+      </nav>
+
+      {/* Mobile Search Overlay */}
+      {isSearchOpen && (
+        <div className="fixed inset-0 bg-white z-[70] p-6 animate-in fade-in slide-in-from-top-4 duration-300">
+           <div className="flex items-center justify-between mb-8">
+              <span className="text-xs font-black uppercase tracking-widest text-primary">AI Powered Search</span>
+              <button onClick={() => setIsSearchOpen(false)} className="p-2"><X size={28} /></button>
+           </div>
+           <div className="relative border-b-2 border-gray-900 pb-4">
+              <input
+                type="text"
+                placeholder="What are you looking for?"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full text-2xl font-black placeholder:text-gray-200 outline-none bg-transparent"
+                autoFocus
+              />
+              <Sparkles className="absolute right-0 top-1 text-primary h-6 w-6" />
+           </div>
+           
+           {searchQuery.length > 0 && (
+             <div className="mt-8 overflow-y-auto max-h-[60vh] space-y-4">
+                {isSearching ? (
+                  <div className="py-12 text-center text-gray-300 animate-pulse text-xs font-bold">Scanning...</div>
+                ) : searchResults.length > 0 ? (
+                  searchResults.map(product => (
+                    <Link key={product._id} href={`/shop/${product._id}`} onClick={() => setIsSearchOpen(false)} className="flex items-center gap-4 p-2 hover:bg-gray-50 rounded-xl">
+                       <div className="w-16 h-16 rounded-lg bg-gray-100 overflow-hidden shrink-0"><img src={product.image} className="w-full h-full object-cover" /></div>
+                       <div>
+                          <p className="font-black text-sm">{product.name}</p>
+                          <p className="text-xs text-gray-400 font-bold">${product.price}</p>
+                       </div>
+                    </Link>
+                  ))
+                ) : (
+                  <div className="py-12 text-center text-gray-400 text-sm">No results for "{searchQuery}"</div>
+                )}
+             </div>
+           )}
+        </div>
+      )}
+
+      {/* Mobile Menu */}
+      {isMobileMenuOpen && (
+        <div className="lg:hidden fixed inset-0 bg-white z-[60] py-10 px-8 flex flex-col gap-10 animate-in slide-in-from-right-full duration-300 overflow-y-auto">
+           <div className="flex justify-between items-center mb-4">
+              <span className="text-2xl font-black uppercase tracking-tighter text-gray-900">{settings?.storeName}</span>
+              <button onClick={() => setIsMobileMenuOpen(false)} className="p-2 bg-gray-50 rounded-full"><X size={28} /></button>
+           </div>
+           
+           <div className="flex flex-col gap-8">
+              <p className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-400 border-b border-gray-100 pb-2">Navigation</p>
+              <Link href="/shop" onClick={() => setIsMobileMenuOpen(false)} className="text-4xl font-black uppercase tracking-tighter hover:text-primary transition-colors">Store</Link>
+              {categories.map(cat => (
+                <Link key={cat} href={`/shop?category=${encodeURIComponent(cat)}`} onClick={() => setIsMobileMenuOpen(false)} className="text-4xl font-black uppercase tracking-tighter text-gray-300 hover:text-gray-900 transition-colors">{cat}</Link>
+              ))}
+           </div>
+
+           <div className="mt-auto pt-10 border-t border-gray-100 flex flex-col gap-6">
+              {!user ? (
+                <Link href="/login" onClick={() => setIsMobileMenuOpen(false)} className="bg-gray-900 text-white py-5 rounded-2xl text-center text-sm font-black uppercase tracking-widest shadow-xl shadow-black/10">Log in / Join</Link>
+              ) : (
+                <Link href="/profile" onClick={() => setIsMobileMenuOpen(false)} className="bg-gray-50 py-5 rounded-2xl text-center text-sm font-black uppercase tracking-widest text-gray-900">My Account</Link>
+              )}
+              <Link href="/contact" onClick={() => setIsMobileMenuOpen(false)} className="text-center text-xs font-black uppercase tracking-widest text-gray-400">Customer Support</Link>
+           </div>
+        </div>
+      )}
+    </header>
   );
 }

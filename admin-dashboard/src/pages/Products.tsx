@@ -195,6 +195,23 @@ export default function Products() {
     }
   };
 
+  const handleDeleteCategory = async (id: string) => {
+    if (!confirm("Are you sure? All products in this category will be moved to 'Uncategorized'.")) return;
+    try {
+      const res = await fetch(`${API_URL}/categories/${id}`, { method: "DELETE" });
+      const data = await res.json();
+      if (data.success) {
+        toast.success("Category deleted");
+        fetchData();
+        if (editingCategory?._id === id) {
+          setEditingCategory({ name: "", image: "", isFeaturedOnHome: false });
+        }
+      }
+    } catch (error) {
+      toast.error("Delete failed");
+    }
+  };
+
   const filteredProducts = useMemo(() => {
     return products.filter((p) => {
       const matchesSearch = p.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
@@ -572,12 +589,20 @@ export default function Products() {
                           </div>
                         </div>
                       </div>
-                      <button 
-                        onClick={() => setEditingCategory(c)}
-                        className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-100 rounded-lg"
-                      >
-                        <Pencil className="h-4 w-4" />
-                      </button>
+                      <div className="flex items-center gap-2">
+                        <button 
+                          onClick={() => setEditingCategory(c)}
+                          className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-100 rounded-lg transition-all"
+                        >
+                          <Pencil className="h-4 w-4" />
+                        </button>
+                        <button 
+                          onClick={() => handleDeleteCategory(c._id)}
+                          className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-100 rounded-lg transition-all"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -586,9 +611,19 @@ export default function Products() {
 
                 {/* Edit Form */}
                 <div className="bg-slate-50/50 p-6 rounded-3xl border border-slate-100">
-                   <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4">
-                    {editingCategory?._id ? 'Edit Category' : 'New Category'}
-                   </p>
+                   <div className="flex justify-between items-center mb-4">
+                     <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                      {editingCategory?._id ? 'Edit Category' : 'New Category'}
+                     </p>
+                     {editingCategory?._id && (
+                       <button 
+                        onClick={() => setEditingCategory({ name: "", image: "", isFeaturedOnHome: false })}
+                        className="text-[10px] font-black text-blue-600 uppercase tracking-widest hover:underline"
+                       >
+                         Reset to New
+                       </button>
+                     )}
+                   </div>
                    <div className="grid grid-cols-2 gap-4">
                      <div className="col-span-2">
                        <input
@@ -620,7 +655,7 @@ export default function Products() {
                     onClick={handleSaveCategory}
                     className="w-full mt-6 bg-slate-900 text-white py-3 rounded-xl font-bold hover:bg-slate-800 transition-all uppercase tracking-widest text-[10px]"
                    >
-                     Save Category Settings
+                     {editingCategory?._id ? 'Update Category' : 'Create Category'}
                    </button>
                 </div>
               </div>

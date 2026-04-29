@@ -1,4 +1,5 @@
 const Category = require("../models/Category");
+const Product = require("../models/Product");
 
 const getCategories = async (req, res) => {
   try {
@@ -23,9 +24,19 @@ const createCategory = async (req, res) => {
 const updateCategory = async (req, res) => {
   try {
     const { id } = req.params;
-    const category = await Category.findByIdAndUpdate(id, req.body, { new: true });
-    if (!category) return res.status(404).json({ success: false, message: "Category not found" });
-    res.status(200).json({ success: true, message: "Category updated", category });
+    const { name } = req.body;
+
+    const oldCategory = await Category.findById(id);
+    if (!oldCategory) return res.status(404).json({ success: false, message: "Category not found" });
+
+    const updatedCategory = await Category.findByIdAndUpdate(id, req.body, { new: true });
+    
+    // If name changed, update all products using the old name
+    if (name && name !== oldCategory.name) {
+      await Product.updateMany({ category: oldCategory.name }, { category: name });
+    }
+
+    res.status(200).json({ success: true, message: "Category updated", category: updatedCategory });
   } catch (error) {
     res.status(500).json({ success: false, message: "Server Error", error: error.message });
   }
@@ -34,9 +45,14 @@ const updateCategory = async (req, res) => {
 const deleteCategory = async (req, res) => {
   try {
     const { id } = req.params;
-    const category = await Category.findByIdAndDelete(id);
+    const category = await Category.findById(id);
     if (!category) return res.status(404).json({ success: false, message: "Category not found" });
-    res.status(200).json({ success: true, message: "Category deleted" });
+
+    // Move products to 'Uncategorized' before deleting
+    await Product.updateMany({ category: category.name }, { category: "Uncategorized" });
+
+    await Category.findByIdAndDelete(id);
+    res.status(200).json({ success: true, message: "Category deleted and products moved to Uncategorized" });
   } catch (error) {
     res.status(500).json({ success: false, message: "Server Error", error: error.message });
   }

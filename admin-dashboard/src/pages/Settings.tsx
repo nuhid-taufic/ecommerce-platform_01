@@ -54,6 +54,8 @@ export default function Settings() {
     showAnnouncement: false,
     announcementText: "",
     announcementLink: "",
+    showMarquee: true,
+    marqueeText: "",
     seoDescription: "",
     seoKeywords: "",
     
@@ -63,6 +65,11 @@ export default function Settings() {
     refundPolicyUrl: "",
     privacyPolicyUrl: "",
     termsUrl: "",
+
+    // Payment Numbers
+    bkashNumber: "",
+    nagadNumber: "",
+    rocketNumber: "",
   });
 
   const { setSettings } = useSettings();
@@ -100,6 +107,8 @@ export default function Settings() {
             showAnnouncement: s.showAnnouncement || false,
             announcementText: s.announcementText || "",
             announcementLink: s.announcementLink || "",
+            showMarquee: s.showMarquee !== undefined ? s.showMarquee : true,
+            marqueeText: s.marqueeText || "",
             seoDescription: s.seoDescription || "",
             seoKeywords: s.seoKeywords || "",
             
@@ -111,6 +120,9 @@ export default function Settings() {
             refundPolicyUrl: s.refundPolicyUrl || "",
             privacyPolicyUrl: s.privacyPolicyUrl || "",
             termsUrl: s.termsUrl || "",
+            bkashNumber: s.bkashNumber || "",
+            nagadNumber: s.nagadNumber || "",
+            rocketNumber: s.rocketNumber || "",
           });
         }
       } catch (error) {
@@ -383,34 +395,67 @@ export default function Settings() {
                             </div>
                         </div>
                     </div>
+
+                    <div className="pt-8 border-t border-slate-100">
+                        <h3 className="text-xs font-black uppercase tracking-[0.2em] text-slate-400 mb-6 flex items-center gap-2"><Phone size={14} /> Mobile Payment Numbers</h3>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            <FormInput label="bKash Personal Number" value={formData.bkashNumber} onChange={(e: any) => handleTextChange(e, 'bkashNumber')} placeholder="e.g. 017xxxxxxxx" />
+                            <FormInput label="Nagad Personal Number" value={formData.nagadNumber} onChange={(e: any) => handleTextChange(e, 'nagadNumber')} placeholder="e.g. 017xxxxxxxx" />
+                            <FormInput label="Rocket Personal Number" value={formData.rocketNumber} onChange={(e: any) => handleTextChange(e, 'rocketNumber')} placeholder="e.g. 017xxxxxxxx" />
+                        </div>
+                    </div>
                 </div>
             )}
 
             {/* 4. MARKETING & SEO TAB */}
             {activeTab === "marketing" && (
                 <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-300">
-                    <div>
-                        <div className="flex items-center justify-between mb-4">
-                            <h3 className="text-xs font-black uppercase tracking-[0.2em] text-slate-400 flex items-center gap-2"><Megaphone size={14} /> Global Announcement Bar</h3>
-                            <label className="relative inline-flex items-center cursor-pointer">
-                                <input type="checkbox" className="sr-only peer" checked={formData.showAnnouncement} onChange={(e) => setFormData({...formData, showAnnouncement: e.target.checked})} />
-                                <div className="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-600"></div>
-                            </label>
-                        </div>
-                        <div className={`space-y-4 ${!formData.showAnnouncement && 'opacity-50 pointer-events-none'}`}>
-                            <FormInput label="Announcement Text" value={formData.announcementText} onChange={(e) => handleTextChange(e, 'announcementText')} placeholder="e.g. Free shipping on orders over $50!" />
-                            <FormInput label="Banner Link (Optional)" value={formData.announcementLink} onChange={(e) => handleTextChange(e, 'announcementLink')} placeholder="e.g. /flash-sales" />
-                        </div>
-                    </div>
-
-                    <div className="pt-8 border-t border-slate-100">
-                        <h3 className="text-xs font-black uppercase tracking-[0.2em] text-slate-400 mb-4 flex items-center gap-2"><Search size={14} /> Search Engine Optimization</h3>
-                        <div className="space-y-4">
-                            <div>
-                                <label className="text-xs font-bold text-slate-600 block mb-1.5">Meta Description</label>
-                                <textarea value={formData.seoDescription} onChange={(e) => handleTextChange(e, 'seoDescription')} className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none font-medium text-sm min-h-[80px]" placeholder="Brief description of your store for Google results" />
+                    <div className="space-y-8">
+                        <div>
+                            <div className="flex items-center justify-between mb-4">
+                                <h3 className="text-xs font-black uppercase tracking-[0.2em] text-slate-400 flex items-center gap-2"><Megaphone size={14} /> Global Announcement Bar (Static)</h3>
+                                <label className="relative inline-flex items-center cursor-pointer">
+                                    <input type="checkbox" className="sr-only peer" checked={formData.showAnnouncement} onChange={(e) => setFormData({...formData, showAnnouncement: e.target.checked})} />
+                                    <div className="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-600"></div>
+                                </label>
                             </div>
-                            <FormInput label="Meta Keywords" value={formData.seoKeywords} onChange={(e) => handleTextChange(e, 'seoKeywords')} placeholder="e.g. ecommerce, fashion, online store" />
+                            <div className={`space-y-4 ${!formData.showAnnouncement && 'opacity-50 pointer-events-none'}`}>
+                                <FormInput label="Announcement Text" value={formData.announcementText} onChange={(e: any) => handleTextChange(e, 'announcementText')} placeholder="e.g. Free shipping on orders over $50!" />
+                                <FormInput label="Banner Link (Optional)" value={formData.announcementLink} onChange={(e: any) => handleTextChange(e, 'announcementLink')} placeholder="e.g. /flash-sales" />
+                            </div>
+                        </div>
+
+                        <div className="pt-8 border-t border-slate-100">
+                            <div className="flex items-center justify-between mb-4">
+                                <h3 className="text-xs font-black uppercase tracking-[0.2em] text-slate-400 flex items-center gap-2"><LayoutTemplate size={14} /> Infinite Marquee (Scrolling)</h3>
+                                <label className="relative inline-flex items-center cursor-pointer">
+                                    <input type="checkbox" className="sr-only peer" checked={formData.showMarquee} onChange={(e) => setFormData({...formData, showMarquee: e.target.checked})} />
+                                    <div className="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-600"></div>
+                                </label>
+                            </div>
+                            <div className={`space-y-4 ${!formData.showMarquee && 'opacity-50 pointer-events-none'}`}>
+                                <div>
+                                    <label className="text-xs font-bold text-slate-600 block mb-1.5">Marquee Message</label>
+                                    <textarea 
+                                        value={formData.marqueeText} 
+                                        onChange={(e) => handleTextChange(e, 'marqueeText')} 
+                                        className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none font-medium text-sm min-h-[80px]" 
+                                        placeholder="Enter the scrolling message..."
+                                    />
+                                    <p className="text-[10px] text-slate-400 mt-2">This text will loop infinitely across the top of your homepage.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="pt-8 border-t border-slate-100">
+                            <h3 className="text-xs font-black uppercase tracking-[0.2em] text-slate-400 mb-4 flex items-center gap-2"><Search size={14} /> Search Engine Optimization</h3>
+                            <div className="space-y-4">
+                                <div>
+                                    <label className="text-xs font-bold text-slate-600 block mb-1.5">Meta Description</label>
+                                    <textarea value={formData.seoDescription} onChange={(e) => handleTextChange(e, 'seoDescription')} className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none font-medium text-sm min-h-[80px]" placeholder="Brief description of your store for Google results" />
+                                </div>
+                                <FormInput label="Meta Keywords" value={formData.seoKeywords} onChange={(e: any) => handleTextChange(e, 'seoKeywords')} placeholder="e.g. ecommerce, fashion, online store" />
+                            </div>
                         </div>
                     </div>
                 </div>

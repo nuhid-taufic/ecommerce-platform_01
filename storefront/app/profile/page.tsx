@@ -235,7 +235,13 @@ const Dashboard = ({ orders, loading }: { orders: any[]; loading: boolean }) => 
                 </div>
                 <div className="text-right">
                   <p className="text-base font-bold">৳{order.totalAmount?.toFixed(2)}</p>
-                  <p className="text-xs text-gray-400 font-semibold uppercase tracking-wider">Amount Paid</p>
+                  <p className="text-xs text-gray-400 font-semibold uppercase tracking-wider">
+                    {order.paymentMethod === "COD" && order.paymentStatus !== "Paid" 
+                      ? "Pay on Delivery" 
+                      : order.paymentStatus === "Paid" 
+                        ? "Amount Paid" 
+                        : "Total Value"}
+                  </p>
                 </div>
               </div>
             ))}

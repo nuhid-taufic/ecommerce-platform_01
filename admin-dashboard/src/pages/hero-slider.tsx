@@ -78,7 +78,7 @@ export default function AdminHeroControl() {
       <div className="mb-8">
         <h1 className="text-3xl font-bold mb-2">Hero Slider Control</h1>
         <p className="text-gray-500">
-          Select up to 3 products to display on the homepage animated slider.
+          Select up to 5 products to display on the homepage animated slider.
           (Currently selected: {featuredCount})
         </p>
       </div>

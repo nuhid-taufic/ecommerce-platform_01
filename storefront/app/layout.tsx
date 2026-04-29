@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Inter, Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "react-hot-toast";
 import Navbar from "@/components/Navbar";
@@ -8,7 +8,8 @@ import SupportWidget from "@/components/SupportWidget";
 import FloatingCart from "@/components/FloatingCart";
 import TrafficTracker from "./components/TrafficTracker";
 
-const inter = Inter({ subsets: ["latin"] });
+const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
+const jakarta = Plus_Jakarta_Sans({ subsets: ["latin"], variable: "--font-jakarta" });
 
 export const metadata: Metadata = {
   title: {
@@ -75,7 +76,7 @@ export default async function RootLayout({
   if (settings?.isMaintenanceMode) {
     return (
       <html lang="en">
-        <body className={inter.className}>
+        <body className={`${inter.variable} ${jakarta.variable} font-sans antialiased`}>
           <div className="min-h-screen flex flex-col items-center justify-center bg-primary text-white p-6 text-center">
             <h1 className="text-4xl md:text-6xl font-black uppercase tracking-tighter mb-4">
               We'll be back soon
@@ -95,7 +96,7 @@ export default async function RootLayout({
       <head>
         <title>{settings?.browserTitle || "STUDIO. | Premium Essentials & Aesthetics"}</title>
         {settings?.faviconUrl && <link rel="icon" href={settings.faviconUrl} />}
-        <style dangerouslySetInnerHTML={{ __html: `
+        <style suppressHydrationWarning dangerouslySetInnerHTML={{ __html: `
           :root {
             ${settings?.colors?.primary ? `--primary-color: ${settings.colors.primary};` : ''}
             ${settings?.colors?.secondary ? `--secondary-color: ${settings.colors.secondary};` : ''}
@@ -103,21 +104,9 @@ export default async function RootLayout({
           }
         `}} />
       </head>
-      <body className={inter.className} suppressHydrationWarning>
+      <body className={`${inter.variable} ${jakarta.variable} font-sans antialiased`} suppressHydrationWarning>
         <TrafficTracker />
         
-        {settings?.showAnnouncement && (
-          <div className="bg-primary text-white text-xs font-bold uppercase tracking-widest py-2 px-4 text-center">
-            {settings.announcementLink ? (
-              <a href={settings.announcementLink} className="hover:opacity-80 transition-opacity">
-                {settings.announcementText}
-              </a>
-            ) : (
-              settings.announcementText
-            )}
-          </div>
-        )}
-
         <Toaster
           position="bottom-right"
           toastOptions={{
@@ -132,11 +121,9 @@ export default async function RootLayout({
           }}
         />
 
-        {}
         <Navbar />
 
-        {}
-        <main>{children}</main>
+        <main className="min-h-screen">{children}</main>
         <Footer />
         <SupportWidget />
         <FloatingCart />

@@ -25,15 +25,27 @@ const settingSchema = new mongoose.Schema(
       instagram: { type: String },
     },
 
+    // Payment Numbers
+    bkashNumber: { type: String },
+    nagadNumber: { type: String },
+    rocketNumber: { type: String },
+
     // Advanced Configurations
     isMaintenanceMode: { type: Boolean, default: false },
     currencySymbol: { type: String, default: "৳" },
     currencyCode: { type: String, default: "BDT" },
     
-    // Announcement Bar
+    // Announcement Bar (Static top bar)
     showAnnouncement: { type: Boolean, default: false },
     announcementText: { type: String, default: "Welcome to our store!" },
     announcementLink: { type: String },
+
+    // Marquee Bar (Infinite scrolling bar)
+    showMarquee: { type: Boolean, default: true },
+    marqueeText: { 
+      type: String, 
+      default: "STUDIO IS A CURATION OF MINIMALIST ESSENTIALS DESIGNED FOR THE MODERN LIFESTYLE. PREMIUM QUALITY GUARANTEED." 
+    },
 
     // SEO Settings
     seoDescription: { type: String },
