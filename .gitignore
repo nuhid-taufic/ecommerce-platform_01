@@ -7,6 +7,8 @@ yarn-debug.log*
 npm-debug.log*
 pnpm-debug.log*
 
+ENV_file_for_project/
+
 # Next.js
 .next/
 out/
